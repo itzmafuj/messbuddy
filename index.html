@@ -2119,7 +2119,14 @@ The developer is not liable for any financial dispute or loss arising from the u
             onValue(ref(db, 'loginUnlock'), (snap) => { globalUnlocks = snap.val() || {}; window.renderMaster(); });
             onValue(ref(db, 'userLinks'), (snap) => { globalUserLinks = snap.val() || {}; refreshDetail(); }, (err) => console.warn('userLinks blocked:', err && err.message));
             onValue(ref(db, 'emailLinks'), (snap) => { globalEmailLinks = snap.val() || {}; refreshDetail(); }, (err) => console.warn('emailLinks blocked:', err && err.message));
-            onValue(query(ref(db, 'tickets'), orderByChild('createdAt'), limitToLast(150)), (snap) => { globalTickets = snap.val() || {}; window.renderMaster(); }, (err) => console.warn('tickets listener blocked (check database rules):', err && err.message));
+            onValue(ref(db, 'tickets'), (snap) => {
+                const out = {}, raw = snap.val() || {};
+                Object.entries(raw).forEach(([k, v]) => {
+                    if (!v || typeof v !== 'object') return;
+                    if (typeof v.no === 'string') out[k] = { ...v, _legacy: true };
+                    else Object.entries(v).forEach(([no, t]) => { if (t && typeof t === 'object') out[no] = t; });
+                });
+                globalTickets = out; window.renderMaster(); }, (err) => console.warn('tickets listener blocked (check database rules):', err && err.message));
             window.loadLegalEditor();
             window.setNavMode('home');
             window.showTab('master', document.getElementById('nav-master'));
@@ -2254,7 +2261,7 @@ The developer is not liable for any financial dispute or loss arising from the u
         if (aKey === vKey) return alert("Admin and Viewer keys must be different.");
 
         try {
-            const mk = await get(child(ref(db), 'messData/keys'));
+            let mk = { exists: () => false }; try { mk = await get(child(ref(db), 'messData/keys')); } catch (e) { /* only the Master may read this */ }
             if (mk.exists()) {
                 const k = mk.val();
                 if ([k.admin, k.viewer].includes(aKey) || [k.admin, k.viewer].includes(vKey))
@@ -2268,6 +2275,7 @@ The developer is not liable for any financial dispute or loss arising from the u
             await set(ref(db, `messRegistry/pending/${reqId}`), {
                 messName: mName, adminKey: aKey, viewerKey: vKey, timestamp: new Date().toISOString()
             });
+            try { await set(ref(db, `regStatus/${user.uid}`), { state: 'pending', name: mName, t: Date.now() }); } catch (e) {}
             localStorage.setItem('mb_reg_ts', String(Date.now()));
             localStorage.setItem('mb_reg_id', reqId);
             alert("Registration Sent! Waiting for the Master Admin to approve.");
@@ -2291,6 +2299,7 @@ The developer is not liable for any financial dispute or loss arising from the u
         await set(ref(db, `messRegistry/active/${reqId}`), { messName: req.messName, adminKey: req.adminKey, viewerKey: req.viewerKey, timestamp: new Date().toISOString() });
         if (req.ownerUid) await set(ref(db, `userLinks/${req.ownerUid}`), { messId: reqId, messName: req.messName, role: 'admin', name: req.ownerName || 'ADMIN', email: req.ownerEmail || '', t: Date.now() });
         await set(ref(db, `messRegistry/pending/${reqId}`), null);
+        if (req.ownerUid) { try { await set(ref(db, `regStatus/${req.ownerUid}`), null); } catch (e) {} }
         logAction(`Approved mess "${req.messName}"`);
         alert(`Mess '${req.messName}' Approved!`);
     };
@@ -2303,6 +2312,7 @@ The developer is not liable for any financial dispute or loss arising from the u
         const why = reason.trim().slice(0, 200) || "No reason given";
         await set(ref(db, `messRegistry/rejected/${reqId}`), { messName: req.messName, reason: why, timestamp: new Date().toISOString(), ownerUid: req.ownerUid || '' });
         await set(ref(db, `messRegistry/pending/${reqId}`), null);
+        if (req.ownerUid) { try { await set(ref(db, `regStatus/${req.ownerUid}`), { state: 'rejected', name: req.messName, reason: why, t: Date.now() }); } catch (e) {} }
         logAction(`Rejected registration "${req.messName}": ${why}`);
     };
 
@@ -2397,7 +2407,7 @@ The developer is not liable for any financial dispute or loss arising from the u
         if (upi && !isUpi(upi)) return alert("Enter a valid UPI ID (e.g. name@bank) or leave it empty.");
         const btn = document.getElementById('cm-btn'); btn.disabled = true;
         try {
-            const mk = await get(child(ref(db), 'messData/keys'));
+            let mk = { exists: () => false }; try { mk = await get(child(ref(db), 'messData/keys')); } catch (e) { /* only the Master may read this */ }
             if (mk.exists() && ([mk.val().admin, mk.val().viewer].includes(aKey) || [mk.val().admin, mk.val().viewer].includes(vKey))) return alert("One of these keys is reserved for the master. Pick different keys.");
             const [aSnap, vSnap] = await Promise.all([get(child(ref(db), `messRegistry/keys/${aKey}`)), get(child(ref(db), `messRegistry/keys/${vKey}`))]);
             if (aSnap.exists() || vSnap.exists()) return alert("One of these keys is already used by another mess. Pick different keys.");
@@ -2650,9 +2660,15 @@ The developer is not liable for any financial dispute or loss arising from the u
     const TK_CLS = { 'OPEN': 'tk-OPEN', 'IN PROGRESS': 'tk-PROG', 'WAITING FOR USER': 'tk-WAIT', 'RESOLVED': 'tk-RES', 'CLOSED': 'tk-CLOSED' };
     let globalTickets = {}, myTickets = {}, unsubTk = null;
 
-    const tkPatch = (no, patch) => Promise.all(Object.entries(patch).map(([k, v]) => set(ref(db, `tickets/${no}/${k}`), v)));
+    // Tickets live at tickets/<messId>/<no> so each mess can only read its own. Old flat tickets (tickets/<no>) stay readable by the Master.
+    const tkPath = (no) => {
+        const t = (isMasterAdmin ? globalTickets : myTickets)[no];
+        if (t && t._legacy) return `tickets/${no}`;
+        return `tickets/${(t && t.messId) || globalCurrentMessId}/${no}`;
+    };
+    const tkPatch = (no, patch) => Promise.all(Object.entries(patch).map(([k, v]) => set(ref(db, `${tkPath(no)}/${k}`), v)));
     const tkAddReply = (no, by, name, text) =>
-        set(ref(db, `tickets/${no}/replies/${Date.now()}_${Math.floor(Math.random() * 1000)}`), { by, name, text: String(text).slice(0, 600), t: Date.now() });
+        set(ref(db, `${tkPath(no)}/replies/${Date.now()}_${Math.floor(Math.random() * 1000)}`), { by, name, text: String(text).slice(0, 600), t: Date.now() });
     const tkReplies = t => Object.keys(t.replies || {}).sort().map(k => t.replies[k]);
     const myTicketName = () => (localStorage.getItem('mb_name') || (isAdmin ? 'ADMIN' : '')).toUpperCase();
 
@@ -2686,7 +2702,7 @@ The developer is not liable for any financial dispute or loss arising from the u
     // ---- user side ----
     const listenTickets = (messId) => {
         if (unsubTk) { unsubTk(); unsubTk = null; }
-        unsubTk = onValue(query(ref(db, 'tickets'), orderByChild('messId'), equalTo(messId)), (snap) => {
+        unsubTk = onValue(ref(db, `tickets/${messId}`), (snap) => {
             myTickets = snap.val() || {};
             window.renderTicketsUser();
         }, (err) => console.warn('tickets listener blocked (check database rules):', err && err.message));
@@ -2717,12 +2733,12 @@ The developer is not liable for any financial dispute or loss arising from the u
             let no = null;
             for (let i = 0; i < 6 && !no; i++) {
                 const cand = 'MB-' + (10000 + crypto.getRandomValues(new Uint32Array(1))[0] % 90000);
-                const ex = await get(child(ref(db), `tickets/${cand}`));
+                const ex = await get(child(ref(db), `tickets/${globalCurrentMessId}/${cand}`));
                 if (!ex.exists()) no = cand;
             }
             if (!no) throw new Error('id');
             const now = Date.now();
-            await set(ref(db, `tickets/${no}`), {
+            await set(ref(db, `tickets/${globalCurrentMessId}/${no}`), {
                 no, messId: globalCurrentMessId, messName: data.messName || document.getElementById('display-mess-name').innerText,
                 userName: name, role: isAdmin ? 'Admin' : 'Viewer',
                 category: document.getElementById('tk-cat').value, priority: document.getElementById('tk-pri').value,
@@ -2771,7 +2787,7 @@ The developer is not liable for any financial dispute or loss arising from the u
     window.tkDelete = async (no) => {
         if (!isMasterAdmin || !globalTickets[no]) return;
         if (!confirm(`Delete ticket #${no} permanently? This cannot be undone.`)) return;
-        try { await set(ref(db, `tickets/${no}`), null); logAction(`Deleted ticket ${no}`); } catch (e) { alert("Could not delete. Please try again."); }
+        try { await set(ref(db, tkPath(no)), null); logAction(`Deleted ticket ${no}`); } catch (e) { alert("Could not delete. Please try again."); }
     };
     window.tkAssign = async (no) => {
         if (!isMasterAdmin) return;
@@ -2972,11 +2988,11 @@ The developer is not liable for any financial dispute or loss arising from the u
         // Did this account already file a mess registration?
         let mine = null;
         try {
-            const [pen, rej] = await Promise.all([get(child(ref(db), 'messRegistry/pending')), get(child(ref(db), 'messRegistry/rejected'))]);
-            const find = (snap) => Object.values(snap.val() || {}).find(r => r && r.ownerUid === user.uid);
-            const p = find(pen), r = find(rej);
-            if (p) mine = { state: 'pending', name: p.messName };
-            else if (r) mine = { state: 'rejected', name: r.messName, reason: r.reason };
+            const rs = await get(child(ref(db), `regStatus/${user.uid}`));
+            const st = rs.exists() ? rs.val() : null;
+            const p = st && st.state === 'pending' ? st : null, r = st && st.state === 'rejected' ? st : null;
+            if (p) mine = { state: 'pending', name: p.name };
+            else if (r) mine = { state: 'rejected', name: r.name, reason: r.reason };
         } catch (e) {}
         if (mine && mine.state === 'pending') {
             window.switchView('link');
@@ -3249,7 +3265,7 @@ The developer is not liable for any financial dispute or loss arising from the u
         const last = parseInt(localStorage.getItem('mb_reg_ts') || "0");
         if (Date.now() - last < 60000) { alert("Please wait a minute before sending another request."); return false; }
         try {
-            const mk = await get(child(ref(db), 'messData/keys'));
+            let mk = { exists: () => false }; try { mk = await get(child(ref(db), 'messData/keys')); } catch (e) { /* only the Master may read this */ }
             if (mk.exists()) {
                 const k = mk.val();
                 if ([k.admin, k.viewer].includes(aKey) || [k.admin, k.viewer].includes(vKey)) { alert("That key is reserved. Please pick a unique key."); return false; }
@@ -3262,6 +3278,7 @@ The developer is not liable for any financial dispute or loss arising from the u
                 messName: mName, adminKey: aKey, viewerKey: vKey, timestamp: new Date().toISOString(),
                 ownerUid: user.uid, ownerEmail: user.email || '', ownerName: name
             });
+            try { await set(ref(db, `regStatus/${user.uid}`), { state: 'pending', name: mName, t: Date.now() }); } catch (e) {}
             localStorage.setItem('mb_reg_ts', String(Date.now()));
             localStorage.setItem('mb_reg_id', reqId);
             await showOnboarding(user);
@@ -3281,7 +3298,7 @@ The developer is not liable for any financial dispute or loss arising from the u
         const k = keySnap.val();
         if (k.suspended) { alert("This mess has been suspended by the Master Admin. Please contact the developer."); return false; }
         try {
-            await set(ref(db, `userLinks/${user.uid}`), { messId: k.messId, messName: k.messName || '', role: k.role === 'admin' ? 'admin' : 'viewer', name, email: user.email || '', t: Date.now() });
+            await set(ref(db, `userLinks/${user.uid}`), { messId: k.messId, messName: k.messName || '', role: k.role === 'admin' ? 'admin' : 'viewer', key, name, email: user.email || '', t: Date.now() });
             secReset();
             await completeAccountLogin(user);
             return true;
@@ -3669,7 +3686,7 @@ The developer is not liable for any financial dispute or loss arising from the u
         if (alreadyExists) return alert("Request already sent to Admin!");
         const today = new Date().toISOString().split('T')[0];
         data.pendingDeposits.push({ id: Date.now(), mId: mem.id, amt: currentPayAmount, date: today, name: mem.name });
-        set(currentDataRef, data).then(() => {
+        set(child(currentDataRef, 'pendingDeposits'), data.pendingDeposits).then(() => {
             alert("Request sent! The Admin will approve it shortly.");
             document.getElementById('qr-pay-card').classList.add('hidden');
         });
