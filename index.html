@@ -666,6 +666,17 @@ nav button.active { background: var(--ink); color: #fff !important; }
     </div>
 </div>
 
+<!-- Terms gate: shown once to anyone who has not accepted yet -->
+<div id="terms-gate" class="hidden" role="dialog" aria-modal="true" aria-labelledby="tg-title">
+    <div class="modal-card" style="max-width: 400px; text-align:left;">
+        <h2 id="tg-title" style="margin: 0 0 8px; font-size: 1.4rem;">Before you continue</h2>
+        <p style="font-size:0.86rem; color:var(--ink-dim); margin:0 0 14px; line-height:1.5; font-weight:500;">Please read and accept the Terms &amp; Conditions to use Mess Buddy.</p>
+        <label class="terms-row"><input type="checkbox" id="tg-check"> <span>I agree to the <a role="button" tabindex="0" onclick="event.preventDefault(); showLegal('terms')">Terms &amp; Conditions</a> and <a role="button" tabindex="0" onclick="event.preventDefault(); showLegal('privacy')">Privacy Policy</a></span></label>
+        <button class="btn login-btn" style="margin-top:14px;" onclick="acceptTermsGate()">Accept and continue</button>
+        <div style="text-align:center; margin-top:14px;"><a onclick="resetIdentity()" style="color:var(--ink-dim); font-size:0.82rem; font-weight:600; cursor:pointer; text-decoration:underline;">Log out</a></div>
+    </div>
+</div>
+
 <!-- Privacy / Terms modal -->
 <div id="legal-modal" class="hidden" role="dialog" aria-modal="true" aria-labelledby="legal-title">
     <div class="modal-card" style="max-width: 400px;">
@@ -681,7 +692,21 @@ nav button.active { background: var(--ink); color: #fff !important; }
     <div style="width:34px; height:34px; border-radius:50%; border:4px solid rgba(0,0,0,0.12); border-top-color:#111; animation:mbspin 0.8s linear infinite;"></div>
     <span>Opening Mess Buddy…</span>
 </div>
-<style>@keyframes mbspin { to { transform: rotate(360deg); } } html:not(.auth-ready) #login-screen { visibility: hidden; }</style>
+<style>@keyframes mbspin { to { transform: rotate(360deg); } } html:not(.auth-ready) #login-screen { visibility: hidden; }
+/* terms & conditions page: scrolls reliably inside the app, Close stays visible */
+#legal-modal { overflow: hidden; align-items: center; padding: 16px; }
+#legal-modal .modal-card { display: flex; flex-direction: column; width: 100%; max-width: 440px; max-height: 88vh; max-height: 88dvh; padding: 22px 20px 16px; }
+#legal-title { flex: none; text-align: left; }
+.legal-body { flex: 1 1 auto; min-height: 0; max-height: none !important; overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; touch-action: pan-y; padding-right: 4px; font-size: 0.9rem; line-height: 1.6; }
+.legal-body h4 { margin: 18px 0 4px; font-size: 0.95rem; }
+#legal-modal .login-btn { flex: none; }
+#terms-gate { position: fixed; inset: 0; z-index: 29000; display: flex; align-items: center; justify-content: center; padding: 20px; background: rgba(214,232,228,0.92); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); overflow-y: auto; }
+#terms-gate.hidden { display: none !important; }
+#legal-modal { z-index: 30000 !important; }
+.terms-row { display: flex; align-items: flex-start; gap: 10px; margin: 4px 0 12px; font-size: 0.82rem; line-height: 1.45; font-weight: 500; color: var(--ink-dim); text-align: left; cursor: pointer; }
+.terms-row input[type="checkbox"] { -webkit-appearance: checkbox; appearance: auto; flex: none; width: 22px; height: 22px; margin-top: 1px; padding: 0; background: none; border-radius: 4px; accent-color: #08343a; }
+.terms-row a { color: var(--ink); font-weight: 600; text-decoration: underline; cursor: pointer; }
+</style>
 
 <div id="lang-pill" style="position:fixed; top:10px; right:10px; z-index:99995;">
     <select id="lang-sel" aria-label="Language" onchange="mbSetLang(this.value)" style="appearance:none; -webkit-appearance:none; border:1px solid rgba(0,0,0,0.12); background:rgba(255,255,255,0.95); color:#111; border-radius:999px; padding:8px 14px; font-weight:700; font-size:0.78rem; font-family:inherit; box-shadow:0 4px 14px rgba(0,0,0,0.12); cursor:pointer;">
@@ -731,6 +756,7 @@ nav button.active { background: var(--ink); color: #fff !important; }
                     <input type="text" id="su-mess" class="edit-input" placeholder="Mess / PG name" maxlength="40" aria-label="Mess name">
                     <p style="font-size:0.72rem; color:var(--ink-faint); font-weight:600; margin:0 0 10px; line-height:1.4;">The Master Admin approves new messes. After approval you become the admin automatically.</p>
                 </div>
+                <label class="terms-row"><input type="checkbox" id="su-terms"> <span>I agree to the <a role="button" tabindex="0" onclick="event.preventDefault(); showLegal('terms')">Terms &amp; Conditions</a> and <a role="button" tabindex="0" onclick="event.preventDefault(); showLegal('privacy')">Privacy Policy</a></span></label>
             </div>
 
             <button class="btn" style="margin-bottom:12px; background:#fff; color:#1f1f1f; border:1px solid #dadce0; display:flex; align-items:center; justify-content:center; gap:10px; font-weight:700;" onclick="googleSignIn()"><svg width="20" height="20" viewBox="0 0 48 48" aria-hidden="true" style="flex:none;"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg><span>Continue with Google</span></button>
@@ -815,6 +841,7 @@ nav button.active { background: var(--ink); color: #fff !important; }
                     <button class="btn login-btn" onclick="submitAdminRegistration()">Submit request</button>
                 </div>
             </div>
+            <div id="ob-terms-wrap"><label class="terms-row"><input type="checkbox" id="ob-terms"> <span>I agree to the <a role="button" tabindex="0" onclick="event.preventDefault(); showLegal('terms')">Terms &amp; Conditions</a> and <a role="button" tabindex="0" onclick="event.preventDefault(); showLegal('privacy')">Privacy Policy</a></span></label></div>
             <div id="ob-wait" class="hidden"><button class="btn login-btn" onclick="obRecheck()">Check again</button></div>
             <div style="margin-top:18px;"><a onclick="authSignOut()" style="color:var(--ink-dim); font-size:0.8rem; font-weight:700; cursor:pointer; text-decoration:underline;">Use a different account</a></div>
         </div>
@@ -1756,44 +1783,56 @@ nav button.active { background: var(--ink); color: #fff !important; }
     const LEGAL = {
         privacy: {
             title: "Privacy Policy",
-            text: `Last updated: 2026
+            text: `Last updated: October 2026
 
 # What we collect
-Your display name (stored on your device), and the mess data entered by admins: member names, meal counts, expenses, deposits, UPI ID and notices.
+Your name and the email address of the Google or email account you sign in with. The mess data that admins enter: member names, meal counts, expenses, deposits, UPI ID and notices. If you turn on notifications, a device token to send them.
 
 # Where it is stored
-Mess data is stored in Google Firebase Realtime Database. Your name and login state are stored locally on your device using localStorage. We do not use advertising or tracking cookies.
+Everything is stored in Google Firebase (Authentication and Realtime Database). Your login state and chosen language are saved on your device. We do not use advertising or tracking cookies.
+
+# Who can see it
+Members of your mess can see that mess's data. The admin of your mess can see the names and email addresses of its members. The Master Admin of Mess Buddy can see all messes for support and safety. Nobody outside your mess can read your data.
 
 # How it is used
-Only to calculate meal bills and show dues inside your mess. We do not sell or share your data with third parties, except Firebase/Google as our hosting provider.
+Only to run your mess: calculate meal bills, show dues, approve members and send notices. We do not sell your data or show ads.
 
 # Payments
-Mess Buddy does not process payments. UPI payments happen in your own UPI app; the app only generates a payment link and QR code.
+Mess Buddy does not process payments. UPI payments happen in your own UPI app. The app only shows a payment link and QR code.
 
 # Your choices
-You can log out to clear your saved name. To request deletion of your mess data, contact the developer via WhatsApp from the app.
+You can log out at any time. To correct or delete your account or mess data, contact the developer on WhatsApp from the app.
 
 # Contact
 Developer: Mafuj (WhatsApp +91 70742 42645).`
         },
         terms: {
             title: "Terms & Conditions",
-            text: `Last updated: 2026
+            text: `Last updated: October 2026
 
-# Use of the app
-Mess Buddy is a tool to track shared meals and expenses in a mess or PG. You agree to use it only for that purpose and not to misuse, attack or attempt to access data of other messes.
+# Using the app
+Mess Buddy helps a mess or PG track shared meals and expenses. By signing up or signing in you agree to these terms. Use the app only for that purpose, and do not try to break it or reach data of other messes.
 
-# Accuracy
-Admins are responsible for the accuracy of data they enter. Bills are calculated automatically from that data and are provided as-is.
+# Your account
+You sign in with Google or with an email and password. Keep your login private. You are responsible for what is done with your account.
 
-# Access keys
-Keep your access keys private. You are responsible for activity done using your keys.
+# Joining a mess
+New members join with a short-lived join code from their mess admin, or by an invite sent to their Gmail. The admin decides who joins and can remove a member at any time.
+
+# Admins
+An admin is responsible for the data they enter and for the members they approve. Bills are calculated automatically from that data and are provided as they are. Check them before you pay or collect money.
+
+# Registering a mess
+A new mess is approved by the Master Admin. We may reject or remove a mess that breaks these terms.
 
 # Availability
-The app is provided free and "as is" without warranty. We may update, suspend or remove the service at any time.
+The app is free and is provided "as is", without any promise that it will always work. We may update, pause or remove the service or an account at any time.
 
 # Liability
-The developer is not liable for any financial dispute or loss arising from the use of this app.`
+The developer is not responsible for money disputes, wrong entries or losses that come from using this app.
+
+# Changes
+We may change these terms. If we do, you may be asked to accept them again.`
         }
     };
 
@@ -3140,6 +3179,7 @@ The developer is not liable for any financial dispute or loss arising from the u
     const showOnboarding = async (user) => {
         const pend = takePending();
         if (pend) {
+            recordTerms(user);
             const ok = pend.role === 'user' ? await doLink(user, pend.name, pend.key) : await doRegister(user, pend.name, pend.mess);
             if (ok) return;
             const n = document.getElementById('ob-name'); if (n && !n.value) n.value = pend.name;
@@ -3186,6 +3226,30 @@ The developer is not liable for any financial dispute or loss arising from the u
                 }
             } catch (e) { console.warn('transfer check:', e && e.message); }
         }
+    };
+
+    // ---------- Terms acceptance ----------
+    const TERMS_V = '2026-10';
+    const recordTerms = (user) => {
+        if (!user) return;
+        try { localStorage.setItem('mb_terms_' + user.uid, TERMS_V); } catch (e) {}
+        set(ref(db, `termsAccepted/${user.uid}`), { t: Date.now(), v: TERMS_V }).catch(() => {});
+    };
+    const checkTerms = async (user) => {
+        if (!user || isMasterAdmin) return;
+        try { if (localStorage.getItem('mb_terms_' + user.uid) === TERMS_V) return; } catch (e) {}
+        try {
+            const s = await get(child(ref(db), `termsAccepted/${user.uid}`));
+            if (s.exists() && s.val().v === TERMS_V) { try { localStorage.setItem('mb_terms_' + user.uid, TERMS_V); } catch (e) {} return; }
+        } catch (e) { /* rules not ready: ask anyway */ }
+        const g = document.getElementById('terms-gate'); if (!g) return;
+        document.getElementById('tg-check').checked = false;
+        g.classList.remove('hidden');
+    };
+    window.acceptTermsGate = () => {
+        if (!document.getElementById('tg-check').checked) return alert("Please tick the box to accept the Terms & Conditions.");
+        recordTerms(auth.currentUser);
+        document.getElementById('terms-gate').classList.add('hidden');
     };
 
     const MASTER_EMAIL = 'mafujhossain154@gmail.com';
@@ -3259,6 +3323,7 @@ The developer is not liable for any financial dispute or loss arising from the u
         window.executeLogin(l.messId, isAdmin, l.messName);
         watchOwnLink(user.uid);
         ensureMemberIndex(user, l);
+        checkTerms(user);
     };
 
     onAuthStateChanged(auth, async (user) => {
@@ -3274,6 +3339,7 @@ The developer is not liable for any financial dispute or loss arising from the u
                 window.executeLogin(c.messId, isAdmin, c.messName);
                 watchOwnLink(user.uid);
                 ensureMemberIndex(user, c);
+                checkTerms(user);
                 hideAuthLoading();
                 fetchMaint().catch(() => {});
                 acceptTransfer(user).catch(() => {});
@@ -3415,11 +3481,13 @@ The developer is not liable for any financial dispute or loss arising from the u
         if (suRole === 'user') {
             const key = document.getElementById('su-key').value.toUpperCase().replace(/\s/g, '');
             if (!key) { alert("Enter the join code your admin shows you."); return null; }
+            if (!document.getElementById('su-terms').checked) { alert("Please tick the box to accept the Terms & Conditions."); return null; }
             return { role: 'user', name, key };
         }
         const mess = document.getElementById('su-mess').value.trim();
         const err = adminFieldsError(mess);
         if (err) { alert(err); return null; }
+        if (!document.getElementById('su-terms').checked) { alert("Please tick the box to accept the Terms & Conditions."); return null; }
         return { role: 'admin', name, mess };
     };
 
@@ -3469,6 +3537,8 @@ The developer is not liable for any financial dispute or loss arising from the u
         const mName = document.getElementById('reg-mess-name').value.trim();
         if (!name) return alert("Enter your name!");
         const err = adminFieldsError(mName); if (err) return alert(err);
+        if (!document.getElementById('ob-terms').checked) return alert("Please tick the box to accept the Terms & Conditions.");
+        recordTerms(user);
         await doRegister(user, name, mName);
     };
     window.linkAccount = async () => {
@@ -3477,6 +3547,8 @@ The developer is not liable for any financial dispute or loss arising from the u
         const key = document.getElementById('lk-key').value.toUpperCase().replace(/\s/g, '');
         if (!name) return alert("Enter your name!");
         if (!key) return alert("Enter the join code.");
+        if (!document.getElementById('ob-terms').checked) return alert("Please tick the box to accept the Terms & Conditions.");
+        recordTerms(user);
         if (await doLink(user, name, key)) document.getElementById('lk-key').value = '';
     };
 
