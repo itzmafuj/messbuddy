@@ -645,6 +645,7 @@ nav button.active { background: var(--ink); color: #fff !important; }
 .legal-links { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin: 14px 0 6px; }
 .legal-links a { display: inline-block; padding: 12px 16px; min-height: 44px; line-height: 20px; border-radius: 999px; background: rgba(255,255,255,0.85); border: 1px solid var(--line-strong); text-decoration: none; color: var(--ink); font-weight: 500; font-size: 0.82rem; -webkit-tap-highlight-color: rgba(95,214,184,0.3); }
 .legal-links span { width: 100%; font-size: 0.78rem; color: var(--ink-dim); }
+#su-key::placeholder, #lk-key::placeholder { text-transform: none; letter-spacing: 0; font-weight: 400; }
 </style>
 </head>
 <body>
@@ -723,12 +724,11 @@ nav button.active { background: var(--ink); color: #fff !important; }
                 </div>
                 <input type="text" id="su-name" class="edit-input" placeholder="Your name" maxlength="40" autocomplete="name" aria-label="Your name">
                 <div id="su-user">
-                    <input type="password" id="su-key" data-eye class="edit-input" placeholder="Mess access key" maxlength="40" autocomplete="off" aria-label="Access key">
+                    <input type="text" id="su-key" class="edit-input" placeholder="Join code from your admin" maxlength="16" autocomplete="off" autocapitalize="characters" spellcheck="false" style="text-transform:uppercase; text-align:center; letter-spacing:3px; font-weight:600;" aria-label="Mess join code">
+                    <p style="font-size:0.72rem; color:var(--ink-faint); font-weight:500; margin:0 0 10px; line-height:1.4;">Your admin shows a code that works for 5 minutes. After you send it, the admin approves you.</p>
                 </div>
                 <div id="su-admin" class="hidden">
                     <input type="text" id="su-mess" class="edit-input" placeholder="Mess / PG name" maxlength="40" aria-label="Mess name">
-                    <input type="password" id="su-akey" data-eye class="edit-input" placeholder="Create admin key (min 6 chars)" maxlength="30" autocomplete="off" style="text-transform:uppercase;" aria-label="Admin key">
-                    <input type="password" id="su-vkey" data-eye class="edit-input" placeholder="Create viewer key (min 6 chars)" maxlength="30" autocomplete="off" style="text-transform:uppercase;" aria-label="Viewer key">
                     <p style="font-size:0.72rem; color:var(--ink-faint); font-weight:600; margin:0 0 10px; line-height:1.4;">The Master Admin approves new messes. After approval you become the admin automatically.</p>
                 </div>
             </div>
@@ -804,15 +804,13 @@ nav button.active { background: var(--ink); color: #fff !important; }
                 </div>
                 <input type="text" id="ob-name" class="edit-input" placeholder="Your name" maxlength="40" autocomplete="name" aria-label="Your name">
                 <div id="ob-user">
-                    <p style="font-size:0.78rem; color:var(--ink-dim); font-weight:600; margin:0 0 10px; line-height:1.4;">Join an existing mess with the access key your admin gave you.</p>
-                    <input type="password" id="lk-key" class="edit-input" placeholder="Enter access key" maxlength="40" autocomplete="off" aria-label="Access key" style="text-align:center; letter-spacing:3px; font-weight:700;">
-                    <button class="btn login-btn" onclick="linkAccount()">Join mess</button>
+                    <p style="font-size:0.78rem; color:var(--ink-dim); font-weight:600; margin:0 0 10px; line-height:1.4;">Join an existing mess with the code your admin shows you. The code works for 5 minutes, then the admin approves you.</p>
+                    <input type="text" id="lk-key" class="edit-input" placeholder="Join code from your admin" maxlength="16" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="Mess join code" style="text-transform:uppercase; text-align:center; letter-spacing:3px; font-weight:600;">
+                    <button class="btn login-btn" onclick="linkAccount()">Send join request</button>
                 </div>
                 <div id="ob-admin" class="hidden">
                     <p style="font-size:0.78rem; color:var(--ink-dim); font-weight:600; margin:0 0 10px; line-height:1.4;">Register your mess. The Master Admin approves it, then you become its admin automatically.</p>
                     <input type="text" id="reg-mess-name" placeholder="Mess / PG name" class="edit-input" maxlength="40" aria-label="Mess name">
-                    <input type="password" id="reg-admin-key" data-eye placeholder="Create admin key (min 6 chars)" class="edit-input" maxlength="30" autocomplete="off" style="text-transform: uppercase;" aria-label="Admin key">
-                    <input type="password" id="reg-viewer-key" data-eye placeholder="Create viewer key (min 6 chars)" class="edit-input" maxlength="30" autocomplete="off" style="text-transform: uppercase;" aria-label="Viewer key">
                     <input type="text" id="reg-website" class="hp-field" tabindex="-1" autocomplete="off" aria-hidden="true">
                     <button class="btn login-btn" onclick="submitAdminRegistration()">Submit request</button>
                 </div>
@@ -1117,14 +1115,16 @@ nav button.active { background: var(--ink); color: #fff !important; }
         <div id="tab-create" class="tab-content hidden">
             <div class="card">
                 <h3 class="admin-card-header">Create new mess</h3>
-                <p style="font-size:0.8rem; color:var(--ink-dim); margin:0 0 14px; line-height:1.4; font-weight:500;">The mess is created and activated instantly. No approval step is needed.</p>
+                <p style="font-size:0.8rem; color:var(--ink-dim); margin:0 0 14px; line-height:1.4; font-weight:500;">The mess is created and activated instantly. Add the owner's Gmail so they become its admin when they sign in.</p>
                 <input type="text" id="cm-name" class="edit-input" placeholder="Mess / PG name" maxlength="40" aria-label="Mess name">
-                <input type="text" id="cm-admin" class="edit-input" placeholder="Admin key (min 6 chars)" maxlength="30" autocomplete="off" autocapitalize="characters" spellcheck="false" style="text-transform:uppercase;" aria-label="Admin key">
-                <input type="text" id="cm-viewer" class="edit-input" placeholder="Viewer key (min 6 chars)" maxlength="30" autocomplete="off" autocapitalize="characters" spellcheck="false" style="text-transform:uppercase;" aria-label="Viewer key">
-                <input type="email" id="cm-owner" class="edit-input" placeholder="Owner's Gmail (optional, links as Admin)" autocomplete="off" aria-label="Owner email">
+                <input type="email" id="cm-owner" class="edit-input" placeholder="Owner's Gmail (becomes admin)" autocomplete="off" aria-label="Owner email">
                 <input type="text" id="cm-upi" class="edit-input" placeholder="UPI ID (optional, e.g. name@bank)" maxlength="60" autocomplete="off" aria-label="UPI ID">
-                <button class="btn" onclick="genKeys()">🔑 Generate random keys</button>
                 <button id="cm-btn" class="btn login-btn" style="margin-top:10px;" onclick="createMessNow()">Create mess</button>
+            </div>
+            <div class="card">
+                <h3 class="admin-card-header">Old access keys</h3>
+                <p style="font-size:0.8rem; color:var(--ink-dim); margin:0 0 12px; line-height:1.4; font-weight:500;">Keys are not used any more. Delete the old ones so nobody can find them in the database.</p>
+                <button class="btn" style="color:var(--terracotta);" onclick="clearOldKeys()">Delete all old keys</button>
             </div>
             <div id="cm-result" class="card hidden" style="border:1px solid rgba(22,163,74,0.35); background:#f2fbf5;"></div>
         </div>
@@ -1289,21 +1289,55 @@ nav button.active { background: var(--ink); color: #fff !important; }
 
         <div id="tab-settings" class="tab-content hidden">
 
+            <div class="card admin-only hidden" id="joincode-card">
+                <h3 class="admin-card-header">Join code</h3>
+                <p style="font-size:0.8rem; color:var(--ink-dim); margin:0 0 12px; line-height:1.4; font-weight:500;">Give this code to a new member. It works once and expires in 5 minutes. You approve every request below.</p>
+                <div style="text-align:center; padding:16px 10px; border-radius:20px; background:var(--paper-strong); margin-bottom:12px;">
+                    <div id="jc-code" style="font-size:1.9rem; font-weight:600; letter-spacing:6px; color:var(--ink);">——</div>
+                    <div id="jc-timer" style="font-size:0.8rem; color:var(--ink-dim); font-weight:500; margin-top:6px;">No active code</div>
+                </div>
+                <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                    <button class="btn login-btn" style="flex:1 1 100%;" onclick="newJoinCode()">New join code</button>
+                    <button class="btn" style="flex:1;" onclick="copyJoinCode()">Copy</button>
+                    <button class="btn" style="flex:1;" onclick="shareJoinCode()">WhatsApp</button>
+                </div>
+            </div>
+
+            <div class="card admin-only hidden" id="joinreq-card">
+                <h3 class="admin-card-header">Join requests</h3>
+                <div id="jr-list" style="font-size:0.85rem;"></div>
+            </div>
+
+            <div class="card admin-only hidden" id="addmember-card">
+                <h3 class="admin-card-header">Add a member by Gmail</h3>
+                <p style="font-size:0.8rem; color:var(--ink-dim); margin:0 0 12px; line-height:1.4; font-weight:500;">The person joins this mess the next time they sign in with that Gmail. They do not need a code.</p>
+                <select id="am-member" class="edit-input" aria-label="Existing member"><option value="">New person (type the name)</option></select>
+                <input type="text" id="am-name" class="edit-input" placeholder="Name" maxlength="40" aria-label="Name">
+                <input type="email" id="am-email" class="edit-input" placeholder="Gmail address" autocomplete="off" aria-label="Gmail address">
+                <select id="am-role" class="edit-input" aria-label="Role"><option value="viewer">Viewer (can only see)</option><option value="admin">Admin (can edit)</option></select>
+                <button class="btn login-btn" onclick="addMemberByEmail()">Add member</button>
+                <div id="inv-list" style="margin-top:12px; font-size:0.85rem;"></div>
+            </div>
+
+            <div class="card admin-only hidden" id="accounts-card">
+                <h3 class="admin-card-header">Accounts in this mess</h3>
+                <div id="mem-accounts" style="font-size:0.85rem;"></div>
+            </div>
+
             <div class="card" id="transfer-card">
                 <h3 class="admin-card-header">Transfer admin access</h3>
                 <p style="font-size:0.8rem; color:var(--ink-dim); margin:0 0 14px; line-height:1.4; font-weight:500;">Give your admin role to another person. They get it the next time they sign in with this email, and you become a viewer.</p>
-                <input type="email" id="tr-email" class="edit-input" placeholder="New admin's email" autocomplete="off" aria-label="New admin email">
+                <input type="email" id="tr-email" list="mem-emails" class="edit-input" placeholder="New admin's email" autocomplete="off" aria-label="New admin email"><datalist id="mem-emails"></datalist>
                 <button class="btn login-btn" onclick="transferAdmin()">Transfer admin access</button>
                 <div id="tr-status" style="font-size:0.76rem; font-weight:700; color:var(--ink-dim); margin-top:10px; line-height:1.4;"></div>
+                <div id="tr-history" style="font-size:0.76rem; color:var(--ink-dim); margin-top:10px; line-height:1.5;"></div>
             </div>
 
             <div class="card">
                 <h3 class="admin-card-header">System config</h3>
-                <p style="font-size: 0.8rem; color: var(--ink-dim); margin-bottom: 18px; line-height: 1.4;">Update your mess name, UPI ID, or securely change your mess access keys.</p>
+                <p style="font-size: 0.8rem; color: var(--ink-dim); margin-bottom: 18px; line-height: 1.4;">Update your mess name and UPI ID.</p>
                 <input type="text" id="set-mess-name" class="edit-input" placeholder="Mess name" maxlength="40" aria-label="Mess name">
                 <input type="text" id="set-upi-id" class="edit-input" placeholder="UPI ID (e.g. name@bank)" maxlength="60" autocomplete="off" aria-label="UPI ID">
-                <input type="password" id="set-admin-key" data-eye class="edit-input" placeholder="New admin key (master only)" autocomplete="new-password" style="text-transform: uppercase;" aria-label="New admin key">
-                <input type="password" id="set-viewer-key" data-eye class="edit-input" placeholder="New viewer key (master only)" autocomplete="new-password" style="text-transform: uppercase;" aria-label="New viewer key">
                 <button class="btn login-btn" style="margin-top: 8px;" onclick="updateKeys()">Save settings</button>
                 <button class="btn" style="background: transparent; border: 1px solid var(--terracotta); color: var(--terracotta); margin-top:14px;" onclick="resetIdentity()">Logout account</button>
             </div>
@@ -1545,6 +1579,175 @@ nav button.active { background: var(--ink); color: #fff !important; }
     window.hideVersion = async () => {
         if (!isMasterAdmin) return;
         try { await set(ref(db, 'globalVersion'), { text: (verCfg && verCfg.text) || '', show: false }); logAction('Hid version label'); } catch (e) { alert('Could not save.'); }
+    };
+
+    // =====================================================================
+    //  ACCESS: join code, join requests, invites, accounts (mess admin)
+    // =====================================================================
+    const JC_CHARS = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
+    const JC_MS = 5 * 60 * 1000;
+    let accessUnsubs = [], accReqs = {}, accInv = {}, accMembers = {}, accHist = {};
+    let curCode = null, jcTimer = null;
+    const accMid = () => (globalCurrentMessId && globalCurrentMessId !== 'DEFAULT') ? globalCurrentMessId : null;
+    const messTitle = () => (data && data.messName) || (document.getElementById('display-mess-name') || {}).innerText || '';
+
+    window.watchAccess = (mid) => {
+        accessUnsubs.forEach(u => { try { u(); } catch (e) {} }); accessUnsubs = [];
+        accReqs = {}; accInv = {}; accMembers = {}; accHist = {};
+        if (!isAdmin || !mid || mid === 'DEFAULT') { renderAccess(); return; }
+        const w = (path, set_) => accessUnsubs.push(onValue(ref(db, path), (snap) => { set_(snap.val() || {}); renderAccess(); }, (err) => console.warn(path + ' blocked:', err && err.message)));
+        w(`joinRequests/${mid}`, v => accReqs = v);
+        w(`invites/${mid}`, v => accInv = v);
+        w(`members/${mid}`, v => accMembers = v);
+        w(`transferHistory/${mid}`, v => accHist = v);
+    };
+
+    const renderAccess = () => {
+        const req = document.getElementById('jr-list'); if (!req) return;
+        const mid = accMid();
+        // requests
+        const rs = Object.entries(accReqs).sort((a, b) => (b[1].t || 0) - (a[1].t || 0));
+        req.innerHTML = rs.length ? rs.map(([uid, r]) => `<div class="log-row" style="padding:12px 0;"><div style="font-weight:600;">${esc(r.name)}</div><div style="color:var(--ink-dim); font-size:0.78rem; word-break:break-all;">${esc(r.email)} · ${fmtDT(r.t)}</div>
+            <div style="display:flex; gap:8px; margin-top:8px; align-items:center;"><select id="jr-role-${esc(uid)}" class="edit-input" style="height:44px; margin:0; flex:1;" aria-label="Role"><option value="viewer">Viewer</option><option value="admin">Admin</option></select>
+            <button type="button" class="m-btn dark" style="min-height:44px; padding:0 14px;" onclick="approveJoin('${esc(uid)}')">Approve</button>
+            <button type="button" class="m-btn red" style="min-height:44px; padding:0 14px;" onclick="rejectJoin('${esc(uid)}')">Reject</button></div></div>`).join('')
+            : '<div style="color:var(--ink-faint); font-weight:500;">No requests waiting.</div>';
+        // invites
+        const iv = document.getElementById('inv-list');
+        if (iv) {
+            const is = Object.entries(accInv);
+            iv.innerHTML = is.length ? '<div style="font-weight:600; margin-bottom:6px;">Waiting to sign in</div>' + is.map(([k, r]) => `<div class="log-row" style="display:flex; justify-content:space-between; gap:8px; align-items:center;"><div style="min-width:0; word-break:break-all;"><b>${esc(r.name)}</b> · ${esc(r.email)} · ${esc(r.role)}</div><button type="button" class="m-btn red" style="min-height:40px; padding:0 12px; flex:none;" onclick="cancelInvite('${esc(k)}')">Cancel</button></div>`).join('') : '';
+        }
+        // accounts
+        const ac = document.getElementById('mem-accounts');
+        if (ac) {
+            const ms = Object.entries(accMembers).sort((a, b) => String(a[1].name).localeCompare(String(b[1].name)));
+            const me = auth.currentUser && auth.currentUser.uid;
+            ac.innerHTML = ms.length ? ms.map(([uid, m]) => `<div class="log-row" style="padding:10px 0;"><div style="display:flex; justify-content:space-between; gap:8px; align-items:center;"><div style="min-width:0;"><b>${esc(m.name)}</b> <span class="badge-ok" style="${m.role === 'admin' ? '' : 'background:var(--paper-strong); color:var(--ink-dim);'}">${esc(m.role)}</span>${m.suspended ? ' <span class="badge-susp">SUSPENDED</span>' : ''}<div style="color:var(--ink-dim); font-size:0.76rem; word-break:break-all;">${esc(m.email)}</div></div>
+                ${uid === me ? '<span style="color:var(--ink-faint); font-size:0.76rem;">You</span>' : `<div style="display:flex; gap:6px; flex:none;"><button type="button" class="m-btn" style="min-height:40px; padding:0 12px;" onclick="memberSuspend('${esc(uid)}')">${m.suspended ? 'Resume' : 'Suspend'}</button><button type="button" class="m-btn red" style="min-height:40px; padding:0 12px;" onclick="memberRemove('${esc(uid)}')">Remove</button></div>`}</div></div>`).join('')
+                : '<div style="color:var(--ink-faint); font-weight:500;">Accounts appear here after people sign in.</div>';
+            const dl = document.getElementById('mem-emails');
+            if (dl) dl.innerHTML = ms.filter(([u, m]) => m.email && u !== me).map(([u, m]) => `<option value="${esc(m.email)}">${esc(m.name)}</option>`).join('');
+        }
+        // existing named members (for linking a Gmail)
+        const sel = document.getElementById('am-member');
+        if (sel && data && Array.isArray(data.members)) {
+            const names = data.members.filter(Boolean).map(m => m.name);
+            const sig = names.join('|');
+            if (sel.dataset.sig !== sig) {
+                sel.dataset.sig = sig;
+                sel.innerHTML = '<option value="">New person (type the name)</option>' + names.map(n => `<option value="${esc(n)}">${esc(n)}</option>`).join('');
+            }
+        }
+        // transfer history
+        const th = document.getElementById('tr-history');
+        if (th) {
+            const hs = Object.values(accHist).sort((a, b) => (b.t || 0) - (a.t || 0)).slice(0, 5);
+            th.innerHTML = hs.length ? '<b>Past transfers</b><br>' + hs.map(h => `${fmtDT(h.t)}: ${esc(h.fromName || 'Admin')} → ${esc(h.toEmail || '')}`).join('<br>') : '';
+        }
+        if (!mid) return;
+    };
+    document.addEventListener('change', (e) => {
+        if (e.target && e.target.id === 'am-member') {
+            const n = document.getElementById('am-name'); if (n && e.target.value) n.value = e.target.value;
+        }
+    });
+
+    // ----- join code -----
+    const paintCode = () => {
+        const c = document.getElementById('jc-code'), t = document.getElementById('jc-timer'); if (!c) return;
+        if (!curCode) { c.innerText = '——'; t.innerText = 'No active code'; return; }
+        const left = curCode.exp - srvNow();
+        if (left <= 0) { c.innerText = '——'; t.innerText = 'Code expired. Make a new one.'; clearInterval(jcTimer); jcTimer = null; const old = curCode.code; curCode = null; set(ref(db, `messCodes/${old}`), null).catch(() => {}); return; }
+        c.innerText = curCode.code;
+        const m = Math.floor(left / 60000), sec = String(Math.floor(left / 1000) % 60).padStart(2, '0');
+        t.innerText = `Works once · expires in ${m}:${sec}`;
+    };
+    window.newJoinCode = async () => {
+        const mid = accMid(); if (!isAdmin || !mid) return;
+        try {
+            if (curCode) { await set(ref(db, `messCodes/${curCode.code}`), null).catch(() => {}); curCode = null; }
+            const code = Array.from(crypto.getRandomValues(new Uint32Array(8)), n => JC_CHARS[n % JC_CHARS.length]).join('');
+            const exp = srvNow() + JC_MS;
+            await set(ref(db, `messCodes/${code}`), { messId: mid, messName: String(messTitle()).slice(0, 60), exp, by: auth.currentUser ? auth.currentUser.uid : 'master' });
+            curCode = { code, exp };
+            if (jcTimer) clearInterval(jcTimer);
+            jcTimer = setInterval(paintCode, 1000); paintCode();
+        } catch (e) { alert("Could not make a code. Check your connection and try again."); }
+    };
+    const codeText = () => curCode ? `Join "${messTitle()}" on Mess Buddy.\n\nCode: ${curCode.code}\n(works once, for 5 minutes)\n\nOpen the app, tap Sign up, choose User and enter this code.` : '';
+    window.copyJoinCode = async () => {
+        if (!curCode) return alert("Make a join code first.");
+        try { await navigator.clipboard.writeText(codeText()); alert("Copied."); } catch (e) { alert("Could not copy. Please copy the code by hand: " + curCode.code); }
+    };
+    window.shareJoinCode = () => {
+        if (!curCode) return alert("Make a join code first.");
+        window.open(`https://wa.me/?text=${encodeURIComponent(codeText())}`, '_blank', 'noopener');
+    };
+
+    // ----- approve / reject -----
+    window.approveJoin = async (uid) => {
+        const mid = accMid(), r = accReqs[uid]; if (!isAdmin || !mid || !r) return;
+        const role = (document.getElementById('jr-role-' + uid) || {}).value === 'admin' ? 'admin' : 'viewer';
+        try {
+            const rec = { messId: mid, messName: String(messTitle()).slice(0, 60), role, name: r.name, email: r.email || '', t: Date.now() };
+            await set(ref(db, `userLinks/${uid}`), rec);
+            await set(ref(db, `members/${mid}/${uid}`), { name: r.name, email: r.email || '', role, t: Date.now() });
+            await set(ref(db, `joinRequests/${mid}/${uid}`), null);
+            await set(ref(db, `regStatus/${uid}`), null);
+            logAction(`Approved ${r.name} as ${role}`);
+        } catch (e) { alert("Could not approve. Please try again."); }
+    };
+    window.rejectJoin = async (uid) => {
+        const mid = accMid(), r = accReqs[uid]; if (!isAdmin || !mid || !r) return;
+        const why = prompt(`Reject ${r.name}? Reason (they will see it):`, '');
+        if (why === null) return;
+        try {
+            await set(ref(db, `regStatus/${uid}`), { state: 'rejected', kind: 'join', messId: mid, name: String(messTitle()).slice(0, 60), reason: why.trim().slice(0, 150) || 'No reason given', t: Date.now() });
+            await set(ref(db, `joinRequests/${mid}/${uid}`), null);
+        } catch (e) { alert("Could not reject. Please try again."); }
+    };
+
+    // ----- invites by Gmail -----
+    window.addMemberByEmail = async () => {
+        const mid = accMid(); if (!isAdmin || !mid) return;
+        const email = document.getElementById('am-email').value.trim().toLowerCase();
+        const name = (document.getElementById('am-name').value.trim() || email.split('@')[0]).toUpperCase().slice(0, 40);
+        const role = document.getElementById('am-role').value === 'admin' ? 'admin' : 'viewer';
+        if (!isEmail(email)) return alert("Enter a valid Gmail address.");
+        const me = auth.currentUser;
+        if (me && String(me.email || '').toLowerCase() === email) return alert("That is your own Gmail.");
+        try {
+            const rec = { messId: mid, messName: String(messTitle()).slice(0, 60), role, name, email, t: Date.now() };
+            await set(ref(db, `emailLinks/${encEmail(email)}`), rec);
+            await set(ref(db, `invites/${mid}/${encEmail(email)}`), rec);
+            document.getElementById('am-email').value = ''; document.getElementById('am-name').value = '';
+            logAction(`Added ${email} as ${role}`);
+            alert(`${email} can now sign in with this Gmail and join as ${role}.`);
+        } catch (e) { alert("Could not add this member. They may already belong to another mess."); }
+    };
+    window.cancelInvite = async (k) => {
+        const mid = accMid(); if (!isAdmin || !mid) return;
+        try { await set(ref(db, `emailLinks/${k}`), null); await set(ref(db, `invites/${mid}/${k}`), null); } catch (e) { alert("Could not cancel."); }
+    };
+
+    // ----- accounts -----
+    window.memberSuspend = async (uid) => {
+        const mid = accMid(), m = accMembers[uid]; if (!isAdmin || !mid || !m) return;
+        const to = !m.suspended;
+        if (!confirm(to ? `Suspend ${m.name}? They cannot open the app until you resume them.` : `Resume ${m.name}?`)) return;
+        try { await set(ref(db, `userLinks/${uid}/suspended`), to ? true : null); await set(ref(db, `members/${mid}/${uid}/suspended`), to ? true : null); } catch (e) { alert("Could not change. Please try again."); }
+    };
+    window.memberRemove = async (uid) => {
+        const mid = accMid(), m = accMembers[uid]; if (!isAdmin || !mid || !m) return;
+        if (!confirm(`Remove ${m.name} from this mess? They must be added again to come back.`)) return;
+        try { await set(ref(db, `userLinks/${uid}`), null); await set(ref(db, `members/${mid}/${uid}`), null); logAction(`Removed ${m.name}`); } catch (e) { alert("Could not remove. Please try again."); }
+    };
+
+    // keep the account index up to date (self-heals for people who joined before this existed)
+    const ensureMemberIndex = (user, l) => {
+        if (!user || !l || !l.messId) return;
+        set(ref(db, `members/${l.messId}/${user.uid}`), { name: l.name || '', email: user.email || '', role: l.role === 'admin' ? 'admin' : 'viewer', t: Date.now() }).catch(() => {});
     };
 
     // ---------- Legal ----------
@@ -2025,6 +2228,7 @@ The developer is not liable for any financial dispute or loss arising from the u
         data = { members: [], meals: {}, bazar: [], deposits: [], pendingDeposits: [], upiId: "", keys: {} };
         renderNotice();
         currentDataRef = ref(db, messId === 'DEFAULT' ? 'messData' : `messes/${messId}`);
+        if (window.watchAccess) window.watchAccess(messId);
         unsubData = onValue(currentDataRef, (snap) => {
             const cloud = snap.val();
             const sScr = document.getElementById('suspended-screen');
@@ -2290,13 +2494,8 @@ The developer is not liable for any financial dispute or loss arising from the u
         const req = globalPendingMesses[reqId];
         if (!req) return;
 
-        const aSnap = await get(child(ref(db), `messRegistry/keys/${req.adminKey}`));
-        if (aSnap.exists()) return alert("Error: Key was taken while pending. Reject this request.");
-
-        await set(ref(db, `messRegistry/keys/${req.adminKey}`), { messId: reqId, role: 'admin', messName: req.messName });
-        await set(ref(db, `messRegistry/keys/${req.viewerKey}`), { messId: reqId, role: 'viewer', messName: req.messName });
         await set(ref(db, `messes/${reqId}`), { messName: req.messName, members: [], meals: {}, bazar: [], deposits: [], pendingDeposits: [], upiId: "" });
-        await set(ref(db, `messRegistry/active/${reqId}`), { messName: req.messName, adminKey: req.adminKey, viewerKey: req.viewerKey, timestamp: new Date().toISOString() });
+        await set(ref(db, `messRegistry/active/${reqId}`), { messName: req.messName, timestamp: new Date().toISOString() });
         if (req.ownerUid) await set(ref(db, `userLinks/${req.ownerUid}`), { messId: reqId, messName: req.messName, role: 'admin', name: req.ownerName || 'ADMIN', email: req.ownerEmail || '', t: Date.now() });
         await set(ref(db, `messRegistry/pending/${reqId}`), null);
         if (req.ownerUid) { try { await set(ref(db, `regStatus/${req.ownerUid}`), null); } catch (e) {} }
@@ -2316,39 +2515,20 @@ The developer is not liable for any financial dispute or loss arising from the u
         logAction(`Rejected registration "${req.messName}": ${why}`);
     };
 
-    window.changeMessKeys = async (reqId) => {
+    window.changeMessKeys = () => alert("Access keys are not used any more. Members join with a join code from their admin.");
+
+    // One click: delete every old access key from the database (they no longer log anyone in).
+    window.clearOldKeys = async () => {
         if (!isMasterAdmin) return;
-        const r = globalActiveMesses[reqId];
-        if (!r) return;
-
-        const newAdmin = prompt("Enter new ADMIN Key for this mess (min 6 chars):", "")?.trim().toUpperCase();
-        if (!newAdmin) return;
-        const newViewer = prompt("Enter new VIEWER Key for this mess (min 6 chars):", "")?.trim().toUpperCase();
-        if (!newViewer) return;
-
-        if (newAdmin.length < 6 || newViewer.length < 6) return alert("Keys must be at least 6 characters.");
-        if (/[.#$\[\]\/\s]/.test(newAdmin) || /[.#$\[\]\/\s]/.test(newViewer)) return alert("Keys cannot contain spaces or . # $ [ ] /");
-        if (newAdmin === newViewer) return alert("Admin and Viewer keys must be different.");
-
-        if (newAdmin !== r.adminKey) {
-            const aSnap = await get(child(ref(db), `messRegistry/keys/${newAdmin}`));
-            if (aSnap.exists()) return alert(`Key ${newAdmin} is already taken!`);
-        }
-        if (newViewer !== r.viewerKey) {
-            const vSnap = await get(child(ref(db), `messRegistry/keys/${newViewer}`));
-            if (vSnap.exists()) return alert(`Key ${newViewer} is already taken!`);
-        }
-
-        if (newAdmin !== r.adminKey) await set(ref(db, `messRegistry/keys/${r.adminKey}`), null);
-        if (newViewer !== r.viewerKey) await set(ref(db, `messRegistry/keys/${r.viewerKey}`), null);
-
-        await set(ref(db, `messRegistry/keys/${newAdmin}`), { messId: reqId, role: 'admin', messName: r.messName, suspended: r.suspended || null });
-        await set(ref(db, `messRegistry/keys/${newViewer}`), { messId: reqId, role: 'viewer', messName: r.messName, suspended: r.suspended || null });
-        await set(ref(db, `messRegistry/active/${reqId}/adminKey`), newAdmin);
-        await set(ref(db, `messRegistry/active/${reqId}/viewerKey`), newViewer);
-
-        logAction(`Changed login keys of "${r.messName}"`);
-        alert("Keys updated successfully! Provide the new keys to the mess admin.");
+        if (!confirm("Delete all old access keys from the database? Members who are already inside stay inside.")) return;
+        try {
+            await set(ref(db, 'messRegistry/keys'), null);
+            for (const [id, r] of Object.entries(globalActiveMesses)) {
+                if (r && (r.adminKey || r.viewerKey)) { await set(ref(db, `messRegistry/active/${id}/adminKey`), null); await set(ref(db, `messRegistry/active/${id}/viewerKey`), null); }
+            }
+            logAction("Cleared all old access keys");
+            alert("Old access keys deleted.");
+        } catch (e) { alert("Could not delete. Please try again."); }
     };
 
     window.toggleSuspendMess = async (id) => {
@@ -2358,8 +2538,6 @@ The developer is not liable for any financial dispute or loss arising from the u
         if (!confirm(to ? `Suspend "${r.messName}"? Nobody in this mess will be able to log in or use the app.` : `Resume "${r.messName}"?`)) return;
         const v = to ? true : null;
         await set(ref(db, `messRegistry/active/${id}/suspended`), v);
-        await set(ref(db, `messRegistry/keys/${r.adminKey}/suspended`), v);
-        await set(ref(db, `messRegistry/keys/${r.viewerKey}/suspended`), v);
         await set(ref(db, `messes/${id}/suspended`), v);
         logAction(`${to ? "Suspended" : "Resumed"} mess "${r.messName}"`);
         alert(to ? "Mess suspended." : "Mess resumed.");
@@ -2372,8 +2550,6 @@ The developer is not liable for any financial dispute or loss arising from the u
         if (!n) return;
         if (n.length < 3 || n.length > 40) return alert("Mess name must be 3-40 characters.");
         await set(ref(db, `messRegistry/active/${id}/messName`), n);
-        await set(ref(db, `messRegistry/keys/${r.adminKey}/messName`), n);
-        await set(ref(db, `messRegistry/keys/${r.viewerKey}/messName`), n);
         await set(ref(db, `messes/${id}/messName`), n);
         logAction(`Renamed "${r.messName}" to "${n}"`);
         alert("Mess name updated.");
@@ -2382,52 +2558,31 @@ The developer is not liable for any financial dispute or loss arising from the u
     // =====================================================================
     //  CREATE NEW MESS (Master Admin "+" tab)
     // =====================================================================
-    const KEYCHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-    const genKey = () => Array.from(crypto.getRandomValues(new Uint32Array(8)), n => KEYCHARS[n % KEYCHARS.length]).join('');
-    window.genKeys = () => {
-        const a = genKey(); let v = genKey(); while (v === a) v = genKey();
-        document.getElementById('cm-admin').value = a;
-        document.getElementById('cm-viewer').value = v;
-    };
-
     let lastCreated = null;
     window.createMessNow = async () => {
         if (!isMasterAdmin) return;
         const name = document.getElementById('cm-name').value.trim();
-        const aKey = document.getElementById('cm-admin').value.toUpperCase().trim();
-        const vKey = document.getElementById('cm-viewer').value.toUpperCase().trim();
         const upi = document.getElementById('cm-upi').value.trim();
         const ownerEmail = document.getElementById('cm-owner').value.trim().toLowerCase();
         if (ownerEmail && !isEmail(ownerEmail)) return alert("Enter a valid owner email or leave it empty.");
-        if (!name || !aKey || !vKey) return alert("Please fill the mess name and both keys (or tap Generate random keys).");
+        if (!name) return alert("Enter the mess name.");
         if (name.length < 3) return alert("Mess name must be at least 3 characters.");
-        if (aKey.length < 6 || vKey.length < 6) return alert("Keys must be at least 6 characters.");
-        if (/[.#$\[\]\/\s]/.test(aKey) || /[.#$\[\]\/\s]/.test(vKey)) return alert("Keys cannot contain spaces or . # $ [ ] /");
-        if (aKey === vKey) return alert("Admin and Viewer keys must be different.");
         if (upi && !isUpi(upi)) return alert("Enter a valid UPI ID (e.g. name@bank) or leave it empty.");
         const btn = document.getElementById('cm-btn'); btn.disabled = true;
         try {
-            let mk = { exists: () => false }; try { mk = await get(child(ref(db), 'messData/keys')); } catch (e) { /* only the Master may read this */ }
-            if (mk.exists() && ([mk.val().admin, mk.val().viewer].includes(aKey) || [mk.val().admin, mk.val().viewer].includes(vKey))) return alert("One of these keys is reserved for the master. Pick different keys.");
-            const [aSnap, vSnap] = await Promise.all([get(child(ref(db), `messRegistry/keys/${aKey}`)), get(child(ref(db), `messRegistry/keys/${vKey}`))]);
-            if (aSnap.exists() || vSnap.exists()) return alert("One of these keys is already used by another mess. Pick different keys.");
             const id = 'mess_' + Date.now();
-            await set(ref(db, `messRegistry/keys/${aKey}`), { messId: id, role: 'admin', messName: name });
-            await set(ref(db, `messRegistry/keys/${vKey}`), { messId: id, role: 'viewer', messName: name });
             await set(ref(db, `messes/${id}`), { messName: name, members: [], meals: {}, bazar: [], deposits: [], pendingDeposits: [], upiId: upi });
-            await set(ref(db, `messRegistry/active/${id}`), { messName: name, adminKey: aKey, viewerKey: vKey, timestamp: new Date().toISOString() });
+            await set(ref(db, `messRegistry/active/${id}`), { messName: name, timestamp: new Date().toISOString() });
             if (ownerEmail) await set(ref(db, `emailLinks/${encEmail(ownerEmail)}`), { messId: id, messName: name, role: 'admin', name: ownerEmail.split('@')[0].toUpperCase().slice(0, 40), email: ownerEmail, t: Date.now() });
             logAction(`Created mess "${name}"${ownerEmail ? ' (owner ' + ownerEmail + ')' : ''}`);
-            lastCreated = { id, name, aKey, vKey };
-            ['cm-name', 'cm-admin', 'cm-viewer', 'cm-upi', 'cm-owner'].forEach(x => document.getElementById(x).value = '');
+            lastCreated = { id, name, ownerEmail };
+            ['cm-name', 'cm-upi', 'cm-owner'].forEach(x => document.getElementById(x).value = '');
             const box = document.getElementById('cm-result');
             box.innerHTML = `<h3 class="admin-card-header" style="color:var(--sage);">✅ Mess created</h3>
                 <div class="m-meta" style="margin:0 0 6px;">Mess</div><div style="font-weight:800; margin-bottom:12px;">${esc(name)}</div>
-                <div class="m-meta" style="margin:0 0 6px;">Admin key</div><div style="font-weight:800; letter-spacing:2px; margin-bottom:12px;">${esc(aKey)}</div>
-                <div class="m-meta" style="margin:0 0 6px;">Viewer key</div><div style="font-weight:800; letter-spacing:2px; margin-bottom:16px;">${esc(vKey)}</div>
-                ${ownerEmail ? `<div class="m-meta" style="margin:0 0 6px;">Owner (auto-linked as Admin on sign-in)</div><div style="font-weight:800; margin-bottom:16px; word-break:break-all;">${esc(ownerEmail)}</div>` : ''}
+                ${ownerEmail ? `<div class="m-meta" style="margin:0 0 6px;">Admin (links when they sign in with this Gmail)</div><div style="font-weight:800; margin-bottom:16px; word-break:break-all;">${esc(ownerEmail)}</div>` : `<div class="m-meta" style="margin-bottom:16px;">No owner Gmail added. Open the mess and add an admin from its Details page.</div>`}
                 <div class="m-btns">
-                    <button class="edit-btn-small m-btn dark" onclick="copyCreated()">Copy keys</button>
+                    <button class="edit-btn-small m-btn dark" onclick="copyCreated()">Copy message</button>
                     <button class="edit-btn-small m-btn" onclick="shareCreated()">Share on WhatsApp</button>
                     <button class="edit-btn-small m-btn" onclick="openCreated()">Open mess</button>
                 </div>`;
@@ -2437,7 +2592,7 @@ The developer is not liable for any financial dispute or loss arising from the u
             alert("Could not create the mess. Check your connection and database rules.");
         } finally { btn.disabled = false; }
     };
-    const createdText = () => lastCreated ? `🏠 *${lastCreated.name}* is ready on Mess Buddy!\n\nAdmin key: ${lastCreated.aKey}\nViewer key: ${lastCreated.vKey}\n\nKeep these keys private.` : '';
+    const createdText = () => lastCreated ? `🏠 *${lastCreated.name}* is ready on Mess Buddy!\n\n${lastCreated.ownerEmail ? `Sign in with Google using ${lastCreated.ownerEmail}. You become the admin automatically. Then add members from Settings.` : 'Ask the Master Admin to add you as the admin.'}` : '';
     window.copyCreated = async () => {
         try { await navigator.clipboard.writeText(createdText().replace(/\*/g, '')); alert("Copied."); }
         catch (e) { alert("Could not copy. Please copy the keys manually."); }
@@ -2461,6 +2616,10 @@ The developer is not liable for any financial dispute or loss arising from the u
     };
 
     let globalUserLinks = {}, globalEmailLinks = {}, detailMessId = null;
+    // Server time (the phone clock can be wrong). Join codes expire against this.
+    let srvOffset = 0;
+    onValue(ref(db, '.info/serverTimeOffset'), (snap) => { srvOffset = Number(snap.val()) || 0; }, () => {});
+    const srvNow = () => Date.now() + srvOffset;
     const encEmail = (e) => String(e || '').trim().toLowerCase().replace(/\./g, ',');
     const isEmail = (e) => /^[^\s@\/#$\[\]]+@[^\s@\/#$\[\]]+\.[^\s@\/#$\[\]]{2,}$/.test(e);
     const openDetailPage = () => window.showTab('mdetail', document.getElementById('nav-master'));
@@ -2587,7 +2746,7 @@ The developer is not liable for any financial dispute or loss arising from the u
         const out = { app: 'MessBuddy', type: 'mess-backup-all', version: 1, exportedAt: new Date().toISOString(), messes };
         saveFile(JSON.stringify(out, null, 2), `MessBuddy_ALL_backup_${new Date().toISOString().slice(0, 10)}.json`);
         logAction(`Downloaded backup of all messes (${ids.length})`);
-        alert(`Backup of ${ids.length} mess${ids.length === 1 ? '' : 'es'} saved. It contains login keys, so keep the file private.`);
+        alert(`Backup of ${ids.length} mess${ids.length === 1 ? '' : 'es'} saved. It contains all the data, so keep the file private.`);
     };
 
     let logFilter = 'all';
@@ -2981,7 +3140,7 @@ The developer is not liable for any financial dispute or loss arising from the u
     const showOnboarding = async (user) => {
         const pend = takePending();
         if (pend) {
-            const ok = pend.role === 'user' ? await doLink(user, pend.name, pend.key) : await doRegister(user, pend.name, pend.mess, pend.akey, pend.vkey);
+            const ok = pend.role === 'user' ? await doLink(user, pend.name, pend.key) : await doRegister(user, pend.name, pend.mess);
             if (ok) return;
             const n = document.getElementById('ob-name'); if (n && !n.value) n.value = pend.name;
         }
@@ -2991,17 +3150,19 @@ The developer is not liable for any financial dispute or loss arising from the u
             const rs = await get(child(ref(db), `regStatus/${user.uid}`));
             const st = rs.exists() ? rs.val() : null;
             const p = st && st.state === 'pending' ? st : null, r = st && st.state === 'rejected' ? st : null;
-            if (p) mine = { state: 'pending', name: p.name };
+            if (p) mine = { state: 'pending', name: p.name, kind: p.kind };
             else if (r) mine = { state: 'rejected', name: r.name, reason: r.reason };
         } catch (e) {}
         if (mine && mine.state === 'pending') {
             window.switchView('link');
             document.getElementById('ob-forms').classList.add('hidden');
             document.getElementById('ob-wait').classList.remove('hidden');
-            document.getElementById('link-msg').innerText = `⏳ Your mess "${mine.name}" is waiting for Master Admin approval. Once approved, sign in again and you will be its admin.`;
+            document.getElementById('link-msg').innerText = mine.kind === 'join'
+                ? `⏳ Your request to join "${mine.name}" is waiting for the admin. When the admin approves it, tap "Check again".`
+                : `⏳ Your mess "${mine.name}" is waiting for Master Admin approval. Once approved, tap "Check again" and you become its admin.`;
             return;
         }
-        showLinkView(user, mine && mine.state === 'rejected' ? `❌ Your request for "${mine.name}" was rejected: ${mine.reason}. You can submit a new request or join a mess with a key.` : undefined);
+        showLinkView(user, mine && mine.state === 'rejected' ? `❌ Your request for "${mine.name}" was rejected: ${mine.reason}. You can send a new request or join a mess with a new code.` : undefined);
     };
     window.obRecheck = async () => { const u = auth.currentUser; if (u) await completeAccountLogin(u); };
 
@@ -3016,6 +3177,9 @@ The developer is not liable for any financial dispute or loss arising from the u
                     if (!cur || cur.messId === tr.messId) {
                         await set(ref(db, `userLinks/${user.uid}`), { messId: tr.messId, messName: tr.messName || '', role: 'admin', name: (cur && cur.name) || String(user.displayName || user.email.split('@')[0]).toUpperCase().slice(0, 40), email: user.email, t: Date.now() });
                         if (tr.fromUid && tr.fromUid !== user.uid) await set(ref(db, `transferDone/${tr.fromUid}`), { t: Date.now(), to: user.email });
+                        try { await set(ref(db, `transferHistory/${tr.messId}/${Date.now()}`), { t: Date.now(), fromName: tr.fromName || '', toEmail: user.email, toUid: user.uid }); } catch (e) {}
+                        ensureMemberIndex(user, { messId: tr.messId, name: (cur && cur.name) || String(user.displayName || user.email.split('@')[0]).toUpperCase().slice(0, 40), role: 'admin' });
+                        set(ref(db, `invites/${tr.messId}/${encEmail(user.email)}`), null).catch(() => {});
                         await set(ref(db, `adminTransfers/${encEmail(user.email)}`), null);
                         alert(`You are now the Admin of "${tr.messName || 'the mess'}".`);
                     }
@@ -3048,7 +3212,7 @@ The developer is not liable for any financial dispute or loss arising from the u
             if (!snap.exists()) return;
             try {
                 const cur = await get(child(ref(db), `userLinks/${uid}`));
-                if (cur.exists() && cur.val().role === 'admin') await set(ref(db, `userLinks/${uid}/role`), 'viewer');
+                if (cur.exists() && cur.val().role === 'admin') { await set(ref(db, `userLinks/${uid}/role`), 'viewer'); try { await set(ref(db, `members/${cur.val().messId}/${uid}/role`), 'viewer'); } catch (e) {} }
                 await set(ref(db, `transferDone/${uid}`), null);
                 alert("Admin access was transferred. You are now a viewer.");
             } catch (e) {}
@@ -3073,6 +3237,7 @@ The developer is not liable for any financial dispute or loss arising from the u
                     if (inv.exists()) {
                         const v = inv.val();
                         await set(ref(db, `userLinks/${user.uid}`), { messId: v.messId, messName: v.messName || '', role: v.role === 'admin' ? 'admin' : 'viewer', name: v.name || String(user.email).split('@')[0].toUpperCase(), email: user.email, t: Date.now() });
+                        set(ref(db, `invites/${v.messId}/${encEmail(user.email)}`), null).catch(() => {});
                         return completeAccountLogin(user);
                     }
                 } catch (e) { console.warn('emailLinks check:', e && e.message); }
@@ -3093,6 +3258,7 @@ The developer is not liable for any financial dispute or loss arising from the u
         try { localStorage.setItem('mb_link', JSON.stringify({ uid: user.uid, messId: l.messId, messName: l.messName || '', role: l.role, name: l.name || '' })); } catch (e) {}
         window.executeLogin(l.messId, isAdmin, l.messName);
         watchOwnLink(user.uid);
+        ensureMemberIndex(user, l);
     };
 
     onAuthStateChanged(auth, async (user) => {
@@ -3107,6 +3273,7 @@ The developer is not liable for any financial dispute or loss arising from the u
                 isAdmin = c.role === 'admin'; isMasterAdmin = false;
                 window.executeLogin(c.messId, isAdmin, c.messName);
                 watchOwnLink(user.uid);
+                ensureMemberIndex(user, c);
                 hideAuthLoading();
                 fetchMaint().catch(() => {});
                 acceptTransfer(user).catch(() => {});
@@ -3204,12 +3371,9 @@ The developer is not liable for any financial dispute or loss arising from the u
     };
     window.authSignOut = async () => { try { await signOut(auth); } catch (e) {} window.switchView('options'); };
 
-    const adminFieldsError = (mName, aKey, vKey) => {
-        if (!mName || !aKey || !vKey) return "Please fill all fields.";
+    const adminFieldsError = (mName) => {
+        if (!mName) return "Enter your mess name.";
         if (mName.length < 3) return "Mess name is too short.";
-        if (aKey.length < 6 || vKey.length < 6) return "Keys must be at least 6 characters.";
-        if (/[.#$\[\]\/\s]/.test(aKey) || /[.#$\[\]\/\s]/.test(vKey)) return "Keys cannot contain spaces or . # $ [ ] /";
-        if (aKey === vKey) return "Admin and Viewer keys must be different.";
         return '';
     };
 
@@ -3249,36 +3413,26 @@ The developer is not liable for any financial dispute or loss arising from the u
         const name = document.getElementById('su-name').value.trim().toUpperCase();
         if (!name) { alert("Enter your name!"); return null; }
         if (suRole === 'user') {
-            const key = document.getElementById('su-key').value.toUpperCase().trim();
-            if (!key) { alert("Enter the mess access key your admin gave you."); return null; }
+            const key = document.getElementById('su-key').value.toUpperCase().replace(/\s/g, '');
+            if (!key) { alert("Enter the join code your admin shows you."); return null; }
             return { role: 'user', name, key };
         }
         const mess = document.getElementById('su-mess').value.trim();
-        const akey = document.getElementById('su-akey').value.toUpperCase().trim();
-        const vkey = document.getElementById('su-vkey').value.toUpperCase().trim();
-        const err = adminFieldsError(mess, akey, vkey);
+        const err = adminFieldsError(mess);
         if (err) { alert(err); return null; }
-        return { role: 'admin', name, mess, akey, vkey };
+        return { role: 'admin', name, mess };
     };
 
-    const doRegister = async (user, name, mName, aKey, vKey) => {
+    const doRegister = async (user, name, mName) => {
         const last = parseInt(localStorage.getItem('mb_reg_ts') || "0");
         if (Date.now() - last < 60000) { alert("Please wait a minute before sending another request."); return false; }
         try {
-            let mk = { exists: () => false }; try { mk = await get(child(ref(db), 'messData/keys')); } catch (e) { /* only the Master may read this */ }
-            if (mk.exists()) {
-                const k = mk.val();
-                if ([k.admin, k.viewer].includes(aKey) || [k.admin, k.viewer].includes(vKey)) { alert("That key is reserved. Please pick a unique key."); return false; }
-            }
-            const aSnap = await get(child(ref(db), `messRegistry/keys/${aKey}`));
-            const vSnap = await get(child(ref(db), `messRegistry/keys/${vKey}`));
-            if (aSnap.exists() || vSnap.exists()) { alert("One of these keys is already in use. Please pick unique ones."); return false; }
             const reqId = "mess_" + Date.now().toString();
             await set(ref(db, `messRegistry/pending/${reqId}`), {
-                messName: mName, adminKey: aKey, viewerKey: vKey, timestamp: new Date().toISOString(),
+                messName: mName, timestamp: new Date().toISOString(),
                 ownerUid: user.uid, ownerEmail: user.email || '', ownerName: name
             });
-            try { await set(ref(db, `regStatus/${user.uid}`), { state: 'pending', name: mName, t: Date.now() }); } catch (e) {}
+            try { await set(ref(db, `regStatus/${user.uid}`), { state: 'pending', kind: 'mess', name: mName, t: Date.now() }); } catch (e) {}
             localStorage.setItem('mb_reg_ts', String(Date.now()));
             localStorage.setItem('mb_reg_id', reqId);
             await showOnboarding(user);
@@ -3286,23 +3440,26 @@ The developer is not liable for any financial dispute or loss arising from the u
         } catch (e) { alert("Could not send request. Please try again later."); return false; }
     };
 
-    const doLink = async (user, name, key) => {
+    // Join with a short-lived, one-time code. The admin of that mess must approve the request.
+    const doLink = async (user, name, codeIn) => {
         if (Date.now() < secLoad().until) { alert("Too many wrong attempts. Please wait 5 minutes."); return false; }
-        let keySnap = null;
-        if (!/[.#$\[\]\/]/.test(key)) { try { keySnap = await get(child(ref(db), `messRegistry/keys/${key}`)); } catch (e) { keySnap = null; } }
-        if (!keySnap || !keySnap.exists()) {
-            const failed = secFail(); logFail(name, key, failed);
-            alert(failed.until > Date.now() ? "Too many wrong attempts. Locked for 5 minutes." : `Incorrect access key. ${failed.left} attempt${failed.left === 1 ? '' : 's'} left.`);
+        const code = String(codeIn || '').toUpperCase().replace(/\s/g, '');
+        let cs = null;
+        if (/^[A-Z0-9]{6,16}$/.test(code)) { try { cs = await get(child(ref(db), `messCodes/${code}`)); } catch (e) { cs = null; } }
+        const c = cs && cs.exists() ? cs.val() : null;
+        if (!c || c.used || !(Number(c.exp) > srvNow())) {
+            const failed = secFail(); logFail(name, code, failed);
+            alert(failed.until > Date.now() ? "Too many wrong attempts. Locked for 5 minutes." : `This code is wrong, used or expired. Ask your admin for a new code. ${failed.left} attempt${failed.left === 1 ? '' : 's'} left.`);
             return false;
         }
-        const k = keySnap.val();
-        if (k.suspended) { alert("This mess has been suspended by the Master Admin. Please contact the developer."); return false; }
         try {
-            await set(ref(db, `userLinks/${user.uid}`), { messId: k.messId, messName: k.messName || '', role: k.role === 'admin' ? 'admin' : 'viewer', key, name, email: user.email || '', t: Date.now() });
+            await set(ref(db, `messCodes/${code}/used`), user.uid);
+            await set(ref(db, `joinRequests/${c.messId}/${user.uid}`), { name, email: user.email || '', code, t: Date.now() });
+            await set(ref(db, `regStatus/${user.uid}`), { state: 'pending', kind: 'join', messId: c.messId, name: c.messName || 'the mess', t: Date.now() });
             secReset();
-            await completeAccountLogin(user);
+            await showOnboarding(user);
             return true;
-        } catch (e) { alert("Could not save your account link. Check your connection and database rules (userLinks)."); return false; }
+        } catch (e) { alert("Could not send your request. Check your connection and try again with a new code."); return false; }
     };
 
     window.submitAdminRegistration = async () => {
@@ -3310,18 +3467,16 @@ The developer is not liable for any financial dispute or loss arising from the u
         if (document.getElementById('reg-website').value) return;
         const name = document.getElementById('ob-name').value.trim().toUpperCase();
         const mName = document.getElementById('reg-mess-name').value.trim();
-        const aKey = document.getElementById('reg-admin-key').value.toUpperCase().trim();
-        const vKey = document.getElementById('reg-viewer-key').value.toUpperCase().trim();
         if (!name) return alert("Enter your name!");
-        const err = adminFieldsError(mName, aKey, vKey); if (err) return alert(err);
-        await doRegister(user, name, mName, aKey, vKey);
+        const err = adminFieldsError(mName); if (err) return alert(err);
+        await doRegister(user, name, mName);
     };
     window.linkAccount = async () => {
         const user = auth.currentUser; if (!user) return window.switchView('options');
         const name = document.getElementById('ob-name').value.trim().toUpperCase();
-        const key = document.getElementById('lk-key').value.toUpperCase().trim();
+        const key = document.getElementById('lk-key').value.toUpperCase().replace(/\s/g, '');
         if (!name) return alert("Enter your name!");
-        if (!key) return alert("Enter the access key.");
+        if (!key) return alert("Enter the join code.");
         if (await doLink(user, name, key)) document.getElementById('lk-key').value = '';
     };
 
@@ -3401,7 +3556,7 @@ The developer is not liable for any financial dispute or loss arising from the u
                 const cost = Math.round(arr(d.bazar).filter(b => String(b.date || '').startsWith(ym)).reduce((s, b) => s + (parseFloat(b.amt) || 0), 0));
                 return `<div class="m-item"><div class="m-head">${name}${r.suspended ? '<span class="badge-susp">SUSPENDED</span>' : '<span class="badge-ok">ACTIVE</span>'}</div>
                     <div class="m-meta">👥 ${cnt(d.members)} members · ₹${cost} spent this month<br>Created: ${fmtD(r.timestamp)} · Last used: ${d.lastUpdated ? fmtDT(d.lastUpdated) : 'Never'}</div>
-                    <div class="m-btns">${mb('Open', 'openMess', id, 'dark')}${mb('Details', 'viewMess', id)}${mb('Support', 'supportPicker', id)}${mb('Rename', 'renameMess', id)}${mb('Keys', 'changeMessKeys', id)}
+                    <div class="m-btns">${mb('Open', 'openMess', id, 'dark')}${mb('Details', 'viewMess', id)}${mb('Support', 'supportPicker', id)}${mb('Rename', 'renameMess', id)}
                     <button class="edit-btn-small m-btn" onclick="window.downloadBackup('${esc(id)}', false)">Backup</button>
                     ${mb(r.suspended ? 'Resume' : 'Suspend', 'toggleSuspendMess', id)}${mb('Delete', 'deleteActiveMess', id, 'red')}</div></div>`;
             }
@@ -3481,9 +3636,7 @@ The developer is not liable for any financial dispute or loss arising from the u
         const r = globalActiveMesses[id]; if (!r) return;
         if (!confirm(`Delete "${r.messName}"?\n\nIt moves to the Deleted list. You can restore it later or erase it forever.`)) return;
         const snap = await get(ref(db, `messes/${id}`));
-        await set(ref(db, `messRegistry/trash/${id}`), { messName: r.messName, adminKey: r.adminKey, viewerKey: r.viewerKey, createdAt: r.timestamp || null, deletedAt: new Date().toISOString(), data: snap.exists() ? snap.val() : null });
-        await set(ref(db, `messRegistry/keys/${r.adminKey}`), null);
-        await set(ref(db, `messRegistry/keys/${r.viewerKey}`), null);
+        await set(ref(db, `messRegistry/trash/${id}`), { messName: r.messName, createdAt: r.timestamp || null, deletedAt: new Date().toISOString(), data: snap.exists() ? snap.val() : null });
         await set(ref(db, `messRegistry/active/${id}`), null);
         await set(ref(db, `messes/${id}`), null);
         if (viewingMessId === id) window.backToMaster();
@@ -3503,20 +3656,11 @@ The developer is not liable for any financial dispute or loss arising from the u
 
     window.restorePayload = async (p, quiet) => {
         if (!isMasterAdmin) return false;
-        const [a, v, act, mk] = await Promise.all([
-            get(child(ref(db), `messRegistry/keys/${p.adminKey}`)),
-            get(child(ref(db), `messRegistry/keys/${p.viewerKey}`)),
-            get(child(ref(db), `messRegistry/active/${p.id}`)),
-            get(child(ref(db), 'messData/keys'))
-        ]);
-        if ((a.exists() && a.val().messId !== p.id) || (v.exists() && v.val().messId !== p.id)) { alert("One of this mess's keys is already used by another mess. Delete or re-key that mess first."); return false; }
-        if (mk.exists() && ([mk.val().admin, mk.val().viewer].includes(p.adminKey) || [mk.val().admin, mk.val().viewer].includes(p.viewerKey))) { alert("One of the keys is reserved for the master. Cannot restore."); return false; }
+        const act = await get(child(ref(db), `messRegistry/active/${p.id}`));
         if (act.exists() && !confirm("A mess with this ID is already active. Overwrite it with the backup?")) return false;
         const data = (p.data && typeof p.data === 'object') ? { ...p.data } : { members: [], meals: {}, bazar: [], deposits: [], pendingDeposits: [], upiId: "" };
         delete data.suspended; data.messName = p.messName;
-        await set(ref(db, `messRegistry/keys/${p.adminKey}`), { messId: p.id, role: 'admin', messName: p.messName });
-        await set(ref(db, `messRegistry/keys/${p.viewerKey}`), { messId: p.id, role: 'viewer', messName: p.messName });
-        await set(ref(db, `messRegistry/active/${p.id}`), { messName: p.messName, adminKey: p.adminKey, viewerKey: p.viewerKey, timestamp: p.createdAt || new Date().toISOString() });
+        await set(ref(db, `messRegistry/active/${p.id}`), { messName: p.messName, timestamp: p.createdAt || new Date().toISOString() });
         await set(ref(db, `messes/${p.id}`), data);
         await set(ref(db, `messRegistry/trash/${p.id}`), null);
         logAction(`Restored mess "${p.messName}"`);
@@ -3555,7 +3699,7 @@ The developer is not liable for any financial dispute or loss arising from the u
         const safe = String(mess.messName).replace(/[^a-zA-Z0-9]/g, '_');
         saveFile(JSON.stringify(out, null, 2), `MessBuddy_${safe}_backup_${new Date().toISOString().slice(0, 10)}.json`);
         logAction(`Downloaded backup of "${mess.messName}"`);
-        alert("Backup saved. It contains the mess login keys, so keep the file private.");
+        alert("Backup saved. It contains all the mess data, so keep the file private.");
     };
 
     window.restoreFromFile = (inp) => {
@@ -3565,8 +3709,7 @@ The developer is not liable for any financial dispute or loss arising from the u
             let list = [];
             try {
                 const j = JSON.parse(rd.result);
-                const okKey = k => typeof k === 'string' && k.length >= 6 && !/[.#$\[\]\/\s]/.test(k);
-                const okMess = m => m && /^mess_[0-9]+$/.test(m.id || '') && m.messName && okKey(m.adminKey) && okKey(m.viewerKey) && m.adminKey !== m.viewerKey;
+                const okMess = m => m && /^mess_[0-9]+$/.test(m.id || '') && m.messName;
                 if (j.type === 'mess-backup' && okMess(j.mess)) list = [j.mess];
                 else if (j.type === 'mess-backup-all' && Array.isArray(j.messes) && j.messes.length && j.messes.every(okMess)) list = j.messes;
                 else throw new Error('bad');
@@ -3953,8 +4096,6 @@ The developer is not liable for any financial dispute or loss arising from the u
         document.getElementById('set-mess-name').value = data.messName || document.getElementById('display-mess-name').innerText;
         if (data.upiId) document.getElementById('set-upi-id').value = data.upiId;
 
-        document.getElementById('set-admin-key').value = "";
-        document.getElementById('set-viewer-key').value = "";
 
         renderNotice();
         renderBroadcast();
@@ -3996,12 +4137,7 @@ The developer is not liable for any financial dispute or loss arising from the u
     window.updateKeys = () => {
         const nName = document.getElementById('set-mess-name').value.trim();
         const u = document.getElementById('set-upi-id').value.trim();
-        const a = document.getElementById('set-admin-key').value.toUpperCase().trim();
-        const v = document.getElementById('set-viewer-key').value.toUpperCase().trim();
-
         if (u && !isUpi(u)) return alert("Enter a valid UPI ID (e.g. name@bank).");
-        if ((a && a.length < 6) || (v && v.length < 6)) return alert("Keys must be at least 6 characters.");
-        if ((a && /[.#$\[\]\/\s]/.test(a)) || (v && /[.#$\[\]\/\s]/.test(v))) return alert("Keys cannot contain spaces or . # $ [ ] /");
 
         data.upiId = u;
 
@@ -4013,19 +4149,8 @@ The developer is not liable for any financial dispute or loss arising from the u
             }
         }
 
-        if (isMasterAdmin && viewingMessId === 'DEFAULT') {
-            if (!data.keys) data.keys = {};
-            if (a) data.keys.admin = a;
-            if (v) data.keys.viewer = v;
-            window.save();
-            alert("Settings and Master Keys Updated Successfully!");
-        } else {
-            window.save();
-            alert((a || v) ? "Mess Name & UPI ID Updated! (Note: Sub-Messes cannot change keys here. Contact Master Admin)." : "Settings Updated Successfully!");
-        }
-
-        document.getElementById('set-admin-key').value = "";
-        document.getElementById('set-viewer-key').value = "";
+        window.save();
+        alert("Settings Updated Successfully!");
         window.refreshExtras();
     };
 
