@@ -54,7 +54,7 @@ Settle Up: Members scan the UPI QR code to pay their dues, which the Admin then 
 Clone the repository:
 
 Bash
-git clone https://github.com/yourusername/mess-buddy.git
+git clone [ttps://github.com/yourusername/mess-buddy.git](https://github.com/itzmafuj/messbuddy)
 Open index.html in your code editor.
 
 Replace the firebaseConfig object inside the <script type="module"> tag with your own Firebase project credentials. Ensure you have enabled:
