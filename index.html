@@ -951,7 +951,7 @@ nav button.active { background: var(--ink); color: #fff !important; }
         <div id="tab-dashboard" class="tab-content">
 
             <div class="personal-toggle-bar" onclick="togglePersonalView()">
-                <span>View my stats only</span>
+                <span>View my stats only <small id="me-label" onclick="event.stopPropagation();window.chooseMe()" style="color:var(--ink-faint);font-weight:600;text-decoration:underline;margin-left:4px;"></small></span>
                 <input type="checkbox" id="personal-toggle" aria-label="View my stats only">
             </div>
 
@@ -1081,8 +1081,10 @@ nav button.active { background: var(--ink); color: #fff !important; }
                 <h3 class="admin-card-header">Manage team</h3>
                 <div style="display:flex; gap:10px; margin-bottom: 11px;">
                     <input type="text" id="new-mem-name" placeholder="Name" class="edit-input" maxlength="40" aria-label="Member name" style="flex:2; margin: 0;">
-                    <input type="number" id="new-mem-min" placeholder="Min" class="edit-input" min="0" max="200" aria-label="Minimum meals" style="flex:1; margin: 0;">
+                    <input type="number" id="new-mem-min" placeholder="Min meal" class="edit-input" min="0" max="200" aria-label="Minimum meals" style="flex:1; margin: 0;">
                 </div>
+                <input type="email" id="new-mem-email" placeholder="Gmail (so they see their own stats)" class="edit-input" autocomplete="off" aria-label="Member Gmail" style="margin: 0 0 11px;">
+                <select id="new-mem-role" class="edit-input" aria-label="Role" style="margin: 0 0 11px;"><option value="viewer">Viewer (can only see)</option><option value="admin">Admin (can edit)</option></select>
                 <button class="btn primary-btn" onclick="addMember()">Add member</button>
 
                 <hr style="margin:22px 0; border: none; border-top: 1px dashed var(--line-strong);">
@@ -1336,13 +1338,8 @@ nav button.active { background: var(--ink); color: #fff !important; }
             </div>
 
             <div class="card admin-only hidden" id="addmember-card">
-                <h3 class="admin-card-header">Add a member by Gmail</h3>
-                <p style="font-size:0.8rem; color:var(--ink-dim); margin:0 0 12px; line-height:1.4; font-weight:500;">The person joins this mess the next time they sign in with that Gmail. They do not need a code.</p>
-                <select id="am-member" class="edit-input" aria-label="Existing member"><option value="">New person (type the name)</option></select>
-                <input type="text" id="am-name" class="edit-input" placeholder="Name" maxlength="40" aria-label="Name">
-                <input type="email" id="am-email" class="edit-input" placeholder="Gmail address" autocomplete="off" aria-label="Gmail address">
-                <select id="am-role" class="edit-input" aria-label="Role"><option value="viewer">Viewer (can only see)</option><option value="admin">Admin (can edit)</option></select>
-                <button class="btn login-btn" onclick="addMemberByEmail()">Add member</button>
+                <h3 class="admin-card-header">Waiting to sign in</h3>
+                <p style="font-size:0.8rem; color:var(--ink-dim); margin:0 0 12px; line-height:1.4; font-weight:500;">Add or edit a member in Manage team with their Gmail. They join this mess the next time they sign in with that Gmail. No code needed.</p>
                 <div id="inv-list" style="margin-top:12px; font-size:0.85rem;"></div>
             </div>
 
@@ -2004,7 +2001,46 @@ We may change these terms. If we do, you may be asked to accept them again.`
         if (view === 'login' || view === 'options') window.refreshCaptcha();
     };
 
+    // ----- "View my stats only": find which mess member is this account -----
+    const normN = (x) => String(x || '').toUpperCase().replace(/[^A-Z0-9ঀ-৿]/g, '');
+    const meKey = () => 'mb_me_' + (globalCurrentMessId || 'x');
+    const resolveMe = () => {
+        const mem = data.members || [];
+        if (!mem.length) return null;
+        try {
+            const ue = String((auth.currentUser && auth.currentUser.email) || '').toLowerCase();
+            if (ue) { const byMail = mem.find(m => m.email && String(m.email).toLowerCase() === ue); if (byMail) return byMail; }
+        } catch (e) {}
+        try { const id = localStorage.getItem(meKey()); if (id) { const f = mem.find(m => String(m.id) === id); if (f) return f; } } catch (e) {}
+        const me = normN(localStorage.getItem('mb_name'));
+        let em = ''; try { em = normN(((auth.currentUser && auth.currentUser.email) || '').split('@')[0]); } catch (e) {}
+        const pick = (fn) => { const r = mem.filter(fn); return r.length === 1 ? r[0] : null; };
+        return pick(m => me && normN(m.name) === me)
+            || pick(m => em && normN(m.name) === em)
+            || pick(m => me && me.length > 2 && (normN(m.name).startsWith(me) || me.startsWith(normN(m.name))) && normN(m.name).length > 2)
+            || null;
+    };
+    window.chooseMe = () => {
+        const mem = data.members || [];
+        if (!mem.length) return alert("No members in this mess yet.");
+        const old = document.getElementById('me-picker'); if (old) old.remove();
+        const w = document.createElement('div'); w.id = 'me-picker';
+        w.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(8,52,58,.45);display:flex;align-items:center;justify-content:center;padding:20px;';
+        const cur = resolveMe();
+        w.innerHTML = '<div style="background:#fff;border-radius:24px;max-width:360px;width:100%;max-height:80vh;overflow:auto;padding:20px;box-shadow:0 20px 50px rgba(0,0,0,.25);"><div style="font-weight:800;font-size:1.05rem;color:#08343A;margin-bottom:4px;">Which member are you?</div><div style="font-size:.78rem;color:#5b7377;margin-bottom:14px;">Pick your name once. It is remembered on this phone.</div><div id="me-list" style="display:flex;flex-direction:column;gap:8px;"></div><button type="button" id="me-cancel" style="margin-top:14px;width:100%;padding:12px;border:0;border-radius:999px;background:#eef4f3;color:#08343A;font-weight:700;">Cancel</button></div>';
+        document.body.appendChild(w);
+        const list = w.querySelector('#me-list');
+        mem.forEach(m => {
+            const b = document.createElement('button'); b.type = 'button'; b.textContent = m.name;
+            b.style.cssText = 'padding:13px 16px;border:1.5px solid ' + (cur && cur.id === m.id ? '#08343A' : '#d5e3e1') + ';border-radius:999px;background:#fff;color:#08343A;font-weight:700;text-align:left;';
+            b.onclick = () => { try { localStorage.setItem(meKey(), String(m.id)); } catch (e) {} w.remove(); showOnlyMe = true; const t = document.getElementById('personal-toggle'); if (t) t.checked = true; window.refreshUI(); };
+            list.appendChild(b);
+        });
+        w.querySelector('#me-cancel').onclick = () => { w.remove(); showOnlyMe = false; const t = document.getElementById('personal-toggle'); if (t) t.checked = false; window.refreshUI(); };
+    };
+
     window.togglePersonalView = () => {
+        if (!showOnlyMe && !resolveMe()) { window.chooseMe(); return; }
         showOnlyMe = !showOnlyMe;
         document.getElementById('personal-toggle').checked = showOnlyMe;
         window.refreshUI();
@@ -3098,8 +3134,36 @@ We may change these terms. If we do, you may be asked to accept them again.`
         } catch (e) { alert("Could not send. Check your database rules for 'notifications'."); }
     };
 
+    // ---- Android app: push through the phone's own Firebase Messaging (web push does not work inside a WebView) ----
+    const nativePushAvailable = () => !!(window.MessBuddyApp && typeof window.MessBuddyApp.getFcmToken === 'function');
+    const registerNativePush = () => { try { if (nativePushAvailable()) window.MessBuddyApp.getFcmToken(); } catch (e) {} };
+    window.onNativeFcmToken = async (token) => {
+        const sub = document.getElementById('pn-enable-sub');
+        try {
+            if (!token || !loggedIn || !globalCurrentMessId || globalCurrentMessId === 'DEFAULT') return;
+            const key = String(token).slice(-24).replace(/[.#$\[\]\/]/g, '_');
+            await set(ref(db, `fcmTokens/${globalCurrentMessId}/${key}`), { token, role: isAdmin ? 'admin' : 'viewer', name: localStorage.getItem('mb_name') || '', app: 'android', t: Date.now() });
+            if (sub) sub.innerText = 'Push is ON for this device ✓';
+        } catch (e) { if (sub) sub.innerText = 'Could not turn on push on this device.'; }
+    };
+    window.onNativeFcmError = (msg) => { const sub = document.getElementById('pn-enable-sub'); if (sub) sub.innerText = 'Push is not available: ' + (msg || 'unknown error'); };
+    // Android back button: close the top-most page first, return false when nothing is left to close
+    window.onNativeBack = () => {
+        try {
+            const lm = document.getElementById('legal-modal');
+            if (lm && !lm.classList.contains('hidden')) { window.closeLegal(); return true; }
+            const md = document.getElementById('tab-mdetail');
+            if (md && !md.classList.contains('hidden')) { window.closeDetail(); return true; }
+            const home = isMasterAdmin ? 'master' : 'dashboard';
+            const ht = document.getElementById('tab-' + home);
+            if (loggedIn && ht && ht.classList.contains('hidden')) { window.showTab(home, document.getElementById(isMasterAdmin ? 'nav-master' : 'nav-dashboard')); return true; }
+        } catch (e) {}
+        return false;
+    };
+
     window.enablePush = async () => {
         const sub = document.getElementById('pn-enable-sub');
+        if (nativePushAvailable()) { if (sub) sub.innerText = 'Turning on…'; registerNativePush(); return; }
         try {
             if (!('Notification' in window)) return alert("This browser does not support notifications.");
             const perm = await Notification.requestPermission();
@@ -3324,6 +3388,7 @@ We may change these terms. If we do, you may be asked to accept them again.`
         watchOwnLink(user.uid);
         ensureMemberIndex(user, l);
         checkTerms(user);
+        registerNativePush();
     };
 
     onAuthStateChanged(auth, async (user) => {
@@ -3340,6 +3405,7 @@ We may change these terms. If we do, you may be asked to accept them again.`
                 watchOwnLink(user.uid);
                 ensureMemberIndex(user, c);
                 checkTerms(user);
+                registerNativePush();
                 hideAuthLoading();
                 fetchMaint().catch(() => {});
                 acceptTransfer(user).catch(() => {});
@@ -4039,8 +4105,9 @@ We may change these terms. If we do, you may be asked to accept them again.`
         const m = document.getElementById('filter-month').value;
         const y = document.getElementById('filter-year').value;
         const filterStr = `${y}-${m}`;
-        const myName = (localStorage.getItem('mb_name') || "").toUpperCase();
-        const currentUserObj = (data.members || []).find(mem => mem.name === myName);
+        const currentUserObj = resolveMe();
+        const meLabel = document.getElementById('me-label');
+        if (meLabel) meLabel.textContent = currentUserObj ? currentUserObj.name : '';
 
         let totalMeals = 0, totalBillable = 0, mActual = {}, mDeps = {}, income = 0;
         (data.members || []).forEach(mem => { mActual[mem.id] = 0; mDeps[mem.id] = 0; });
@@ -4088,7 +4155,7 @@ We may change these terms. If we do, you may be asked to accept them again.`
         setNum('stat-rate', rate, '₹', 2);
 
         document.getElementById('summary-body').innerHTML = calc
-            .filter(mem => !showOnlyMe || mem.name === myName)
+            .filter(mem => !showOnlyMe || (currentUserObj && mem.id === currentUserObj.id))
             .map(mem => {
                 const billAmount = Math.round(mem.bill * rate);
                 const depAmount = Math.round(mDeps[mem.id] || 0);
@@ -4125,18 +4192,18 @@ We may change these terms. If we do, you may be asked to accept them again.`
 
         document.getElementById('members-list-body').innerHTML = (data.members || []).map(mem => `
             <tr>
-                <td style="font-weight:700;">${esc(mem.name)}</td>
+                <td style="font-weight:700;">${esc(mem.name)}${isAdmin ? `<div style="font-size:0.68rem;font-weight:600;color:var(--ink-faint);word-break:break-all;">${mem.email ? esc(mem.email) + ' · ' + (mem.role === 'admin' ? 'Admin' : 'Viewer') : 'No Gmail yet'}</div>` : ''}</td>
                 <td style="font-weight:600;">${Number(mem.minMeal) || 0}</td>
                 ${isAdmin ? `
                 <td style="text-align: right;">
-                    <button class="edit-btn-small" style="padding:6px 10px; font-size:0.7rem;" onclick="window.editMinMeal(${Number(mem.id)}, ${Number(mem.minMeal) || 0})">✎ Edit</button>
+                    <button class="edit-btn-small" style="padding:6px 10px; font-size:0.7rem;" onclick="window.editMember(${Number(mem.id)})">✎ Edit</button>
                     <button class="del-btn" aria-label="Delete member" style="padding:6px 10px; font-size:0.7rem;" onclick="window.delMember(${Number(mem.id)})">✕</button>
                 </td>` : '<td></td>'}
             </tr>`).join('');
 
         const dates = Object.keys(data.meals || {}).sort().reverse();
         const filteredDates = dates.filter(d => d.startsWith(filterStr));
-        const filteredMembers = (data.members || []).filter(mem => !showOnlyMe || mem.name === myName);
+        const filteredMembers = (data.members || []).filter(mem => !showOnlyMe || (currentUserObj && mem.id === currentUserObj.id));
         document.getElementById('meal-history-head').innerHTML = `<tr><th>Date</th>${filteredMembers.map(mem => `<th>${esc(mem.name.substring(0, 3))}</th>`).join('')} ${isAdmin ? '<th></th>' : ''}</tr>`;
         document.getElementById('meal-history-body').innerHTML = filteredDates.map(d => `<tr><td style="color:var(--ink-faint); font-size:0.75rem; font-weight:700;">${esc(d.substring(5))}</td>${filteredMembers.map(mem => `<td style="font-weight:600;">${data.meals[d][mem.id] || 0}</td>`).join('')}${isAdmin ? `<td><button onclick="window.delMeal('${esc(d)}')" aria-label="Delete record" class="del-btn" style="padding:4px 8px; font-size:0.65rem;">✕</button></td>` : ''}</tr>`).join('');
 
@@ -4323,10 +4390,85 @@ We may change these terms. If we do, you may be asked to accept them again.`
         if (isNaN(min) || min < 0 || min > 200) return alert("Minimum meals must be between 0 and 200.");
         if (!data.members) data.members = [];
         if (data.members.some(x => x.name === n.toUpperCase())) return alert("A member with this name already exists.");
-        data.members.push({ id: Date.now(), name: n.toUpperCase(), minMeal: min });
+        const email = document.getElementById('new-mem-email').value.trim().toLowerCase();
+        const role = document.getElementById('new-mem-role').value === 'admin' ? 'admin' : 'viewer';
+        if (email && !isEmail(email)) return alert("Enter a valid Gmail address.");
+        if (email && data.members.some(x => String(x.email || '').toLowerCase() === email)) return alert("This Gmail is already used by another member.");
+        const mem = { id: Date.now(), name: n.toUpperCase(), minMeal: min };
+        if (email) { mem.email = email; mem.role = role; }
+        data.members.push(mem);
         window.save();
+        if (email) window.syncMemberLogin(mem, '');
         document.getElementById('new-mem-name').value = "";
         document.getElementById('new-mem-min').value = "";
+        document.getElementById('new-mem-email').value = "";
+        document.getElementById('new-mem-role').value = "viewer";
+    };
+
+    // Link a member to a Gmail: the person joins (or is updated) the next time they sign in with it
+    window.syncMemberLogin = async (mem, oldEmail) => {
+        const mid = accMid(); if (!isAdmin || !mid || !mem) return;
+        const email = String(mem.email || '').toLowerCase();
+        const role = mem.role === 'admin' ? 'admin' : 'viewer';
+        try {
+            if (oldEmail && oldEmail !== email) {
+                const k = encEmail(oldEmail);
+                await set(ref(db, `emailLinks/${k}`), null).catch(() => {});
+                await set(ref(db, `invites/${mid}/${k}`), null).catch(() => {});
+            }
+            if (!email) return;
+            const me = auth.currentUser;
+            if (me && String(me.email || '').toLowerCase() === email) return; // the admin's own Gmail
+            const joined = Object.entries(accMembers || {}).find(([u, m]) => m && String(m.email || '').toLowerCase() === email);
+            const rec = { messId: mid, messName: String(messTitle()).slice(0, 60), role, name: mem.name, email, t: Date.now() };
+            if (joined) {
+                const uid = joined[0];
+                await set(ref(db, `userLinks/${uid}`), { ...rec, ...(joined[1].suspended ? { suspended: true } : {}) });
+                await set(ref(db, `members/${mid}/${uid}`), { name: mem.name, email, role, t: Date.now(), ...(joined[1].suspended ? { suspended: true } : {}) });
+            } else {
+                await set(ref(db, `emailLinks/${encEmail(email)}`), rec);
+                await set(ref(db, `invites/${mid}/${encEmail(email)}`), rec);
+            }
+            logAction(`Linked ${email} to ${mem.name} as ${role}`);
+        } catch (e) { alert("Member saved, but the Gmail could not be linked. It may already belong to another mess."); }
+    };
+
+    window.editMember = (id) => {
+        if (!isAdmin) return;
+        const mem = (data.members || []).find(m => m.id === id); if (!mem) return;
+        const old = document.getElementById('me-edit'); if (old) old.remove();
+        const w = document.createElement('div'); w.id = 'me-edit';
+        w.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(8,52,58,.45);display:flex;align-items:center;justify-content:center;padding:20px;';
+        w.innerHTML = '<div style="background:#fff;border-radius:24px;max-width:380px;width:100%;max-height:90vh;overflow:auto;padding:20px;box-shadow:0 20px 50px rgba(0,0,0,.25);"><div style="font-weight:800;font-size:1.05rem;color:#08343A;margin-bottom:12px;">Edit member</div>'
+            + '<input id="ed-name" class="edit-input" maxlength="40" placeholder="Name" aria-label="Name" style="margin:0 0 10px;">'
+            + '<input id="ed-min" type="number" min="0" max="200" class="edit-input" placeholder="Min meal" aria-label="Minimum meals" style="margin:0 0 10px;">'
+            + '<input id="ed-email" type="email" class="edit-input" placeholder="Gmail" autocomplete="off" aria-label="Gmail" style="margin:0 0 10px;">'
+            + '<select id="ed-role" class="edit-input" aria-label="Role" style="margin:0 0 14px;"><option value="viewer">Viewer (can only see)</option><option value="admin">Admin (can edit)</option></select>'
+            + '<button type="button" id="ed-save" class="btn primary-btn" style="width:100%;">Save</button>'
+            + '<button type="button" id="ed-cancel" style="margin-top:10px;width:100%;padding:12px;border:0;border-radius:999px;background:#eef4f3;color:#08343A;font-weight:700;">Cancel</button></div>';
+        document.body.appendChild(w);
+        w.querySelector('#ed-name').value = mem.name || '';
+        w.querySelector('#ed-min').value = Number(mem.minMeal) || 0;
+        w.querySelector('#ed-email').value = mem.email || '';
+        w.querySelector('#ed-role').value = mem.role === 'admin' ? 'admin' : 'viewer';
+        w.querySelector('#ed-cancel').onclick = () => w.remove();
+        w.querySelector('#ed-save').onclick = () => {
+            const name = w.querySelector('#ed-name').value.trim().toUpperCase();
+            const min = parseInt(w.querySelector('#ed-min').value);
+            const email = w.querySelector('#ed-email').value.trim().toLowerCase();
+            const role = w.querySelector('#ed-role').value === 'admin' ? 'admin' : 'viewer';
+            if (!name) return alert("Enter a member name.");
+            if (isNaN(min) || min < 0 || min > 200) return alert("Minimum meals must be between 0 and 200.");
+            if (email && !isEmail(email)) return alert("Enter a valid Gmail address.");
+            if ((data.members || []).some(x => x.id !== id && x.name === name)) return alert("A member with this name already exists.");
+            if (email && (data.members || []).some(x => x.id !== id && String(x.email || '').toLowerCase() === email)) return alert("This Gmail is already used by another member.");
+            const oldEmail = String(mem.email || '').toLowerCase();
+            mem.name = name; mem.minMeal = min;
+            if (email) { mem.email = email; mem.role = role; } else { delete mem.email; delete mem.role; }
+            window.save();
+            window.syncMemberLogin(mem, oldEmail);
+            w.remove();
+        };
     };
 
     window.addDeposit = () => {
