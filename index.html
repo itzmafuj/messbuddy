@@ -678,12 +678,10 @@ nav button.active { background: var(--ink); color: #fff !important; }
 </div>
 
 <!-- Privacy / Terms modal -->
-<div id="legal-modal" class="hidden" role="dialog" aria-modal="true" aria-labelledby="legal-title">
-    <div class="modal-card" style="max-width: 400px;">
-        <h2 id="legal-title" class="serif" style="margin: 0 0 14px; color: var(--ink); font-size: 1.4rem;"></h2>
-        <div id="legal-content" class="legal-body"></div>
-        <button class="btn login-btn" onclick="closeLegal()">Close</button>
-    </div>
+<div id="legal-modal" class="hidden pg-page" role="dialog" aria-modal="true" aria-labelledby="legal-title">
+    <div class="pg-bar"><button type="button" class="pg-back" onclick="closeLegal()" aria-label="Back">&#8249; Back</button><h2 id="legal-title"></h2></div>
+    <div id="legal-content" class="legal-body pg-body"></div>
+    <div class="pg-foot"><button class="btn login-btn" onclick="closeLegal()">Close</button></div>
 </div>
 
 <!-- Mess details modal (Master Admin) -->
@@ -703,6 +701,18 @@ nav button.active { background: var(--ink); color: #fff !important; }
 #terms-gate { position: fixed; inset: 0; z-index: 29000; display: flex; align-items: center; justify-content: center; padding: 20px; background: rgba(214,232,228,0.92); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); overflow-y: auto; }
 #terms-gate.hidden { display: none !important; }
 #legal-modal { z-index: 30000 !important; }
+/* full-page screens (Terms, Privacy, Edit member) */
+.pg-page, #legal-modal.pg-page { position: fixed !important; inset: 0 !important; z-index: 100000 !important; display: flex !important; flex-direction: column; align-items: stretch !important; justify-content: flex-start !important; padding: 0 !important; overflow: hidden !important; background: linear-gradient(180deg,#eaf5f2,#dcebe7) !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; animation: none !important; }
+.pg-page.hidden, #legal-modal.pg-page.hidden { display: none !important; }
+.pg-bar { flex: none; display: flex; align-items: center; gap: 12px; padding: max(14px, env(safe-area-inset-top)) 16px 12px; background: rgba(255,255,255,0.7); border-bottom: 1px solid var(--line-strong); }
+.pg-bar h2 { margin: 0 !important; font-size: 1.15rem !important; font-weight: 700; color: var(--ink) !important; text-align: left; }
+.pg-back { flex: none; border: 0; background: #08343A; color: #fff; border-radius: 999px; padding: 10px 16px; min-height: 44px; font-weight: 700; font-size: 0.9rem; cursor: pointer; }
+.pg-page .pg-body, #legal-modal .pg-body { flex: 1 1 auto; min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 18px 20px; max-width: 640px; width: 100%; margin: 0 auto; box-sizing: border-box; }
+.pg-foot { flex: none; padding: 12px 20px max(14px, env(safe-area-inset-bottom)); background: rgba(255,255,255,0.7); border-top: 1px solid var(--line-strong); }
+.pg-foot .btn { max-width: 640px; margin: 0 auto; display: block; width: 100%; }
+.pg-body .edit-input { margin: 0 0 12px; }
+.pg-bar h2, #legal-title { color: #08343A !important; } .legal-body h4 { color: #08343A !important; }
+.pg-body label.pg-lbl { display: block; font-size: 0.78rem; font-weight: 700; color: var(--ink-dim); margin: 0 0 4px 4px; }
 .terms-row { display: flex; align-items: flex-start; gap: 10px; margin: 4px 0 12px; font-size: 0.82rem; line-height: 1.45; font-weight: 500; color: var(--ink-dim); text-align: left; cursor: pointer; }
 .terms-row input[type="checkbox"] { -webkit-appearance: checkbox; appearance: auto; flex: none; width: 22px; height: 22px; margin-top: 1px; padding: 0; background: none; border-radius: 4px; accent-color: #08343a; }
 .terms-row a { color: var(--ink); font-weight: 600; text-decoration: underline; cursor: pointer; }
@@ -3152,6 +3162,8 @@ We may change these terms. If we do, you may be asked to accept them again.`
         try {
             const lm = document.getElementById('legal-modal');
             if (lm && !lm.classList.contains('hidden')) { window.closeLegal(); return true; }
+            const ee = document.getElementById('me-edit'); if (ee) { ee.remove(); return true; }
+            const mp = document.getElementById('me-picker'); if (mp) { mp.remove(); return true; }
             const md = document.getElementById('tab-mdetail');
             if (md && !md.classList.contains('hidden')) { window.closeDetail(); return true; }
             const home = isMasterAdmin ? 'master' : 'dashboard';
@@ -4437,21 +4449,20 @@ We may change these terms. If we do, you may be asked to accept them again.`
         if (!isAdmin) return;
         const mem = (data.members || []).find(m => m.id === id); if (!mem) return;
         const old = document.getElementById('me-edit'); if (old) old.remove();
-        const w = document.createElement('div'); w.id = 'me-edit';
-        w.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(8,52,58,.45);display:flex;align-items:center;justify-content:center;padding:20px;';
-        w.innerHTML = '<div style="background:#fff;border-radius:24px;max-width:380px;width:100%;max-height:90vh;overflow:auto;padding:20px;box-shadow:0 20px 50px rgba(0,0,0,.25);"><div style="font-weight:800;font-size:1.05rem;color:#08343A;margin-bottom:12px;">Edit member</div>'
-            + '<input id="ed-name" class="edit-input" maxlength="40" placeholder="Name" aria-label="Name" style="margin:0 0 10px;">'
-            + '<input id="ed-min" type="number" min="0" max="200" class="edit-input" placeholder="Min meal" aria-label="Minimum meals" style="margin:0 0 10px;">'
-            + '<input id="ed-email" type="email" class="edit-input" placeholder="Gmail" autocomplete="off" aria-label="Gmail" style="margin:0 0 10px;">'
-            + '<select id="ed-role" class="edit-input" aria-label="Role" style="margin:0 0 14px;"><option value="viewer">Viewer (can only see)</option><option value="admin">Admin (can edit)</option></select>'
-            + '<button type="button" id="ed-save" class="btn primary-btn" style="width:100%;">Save</button>'
-            + '<button type="button" id="ed-cancel" style="margin-top:10px;width:100%;padding:12px;border:0;border-radius:999px;background:#eef4f3;color:#08343A;font-weight:700;">Cancel</button></div>';
+        const w = document.createElement('div'); w.id = 'me-edit'; w.className = 'pg-page'; w.setAttribute('role', 'dialog');
+        w.innerHTML = '<div class="pg-bar"><button type="button" class="pg-back" id="ed-back" aria-label="Back">&#8249; Back</button><h2>Edit member</h2></div>'
+            + '<div class="pg-body">'
+            + '<label class="pg-lbl" for="ed-name">Name</label><input id="ed-name" class="edit-input" maxlength="40" placeholder="Name">'
+            + '<label class="pg-lbl" for="ed-min">Minimum meals</label><input id="ed-min" type="number" min="0" max="200" class="edit-input" placeholder="Min meal">'
+            + '<label class="pg-lbl" for="ed-email">Gmail (member sees their own stats after signing in with it)</label><input id="ed-email" type="email" class="edit-input" placeholder="name@gmail.com" autocomplete="off">'
+            + '<label class="pg-lbl" for="ed-role">Role</label><select id="ed-role" class="edit-input"><option value="viewer">Viewer (can only see)</option><option value="admin">Admin (can edit)</option></select>'
+            + '</div><div class="pg-foot"><button type="button" id="ed-save" class="btn primary-btn">Save</button></div>';
         document.body.appendChild(w);
         w.querySelector('#ed-name').value = mem.name || '';
         w.querySelector('#ed-min').value = Number(mem.minMeal) || 0;
         w.querySelector('#ed-email').value = mem.email || '';
         w.querySelector('#ed-role').value = mem.role === 'admin' ? 'admin' : 'viewer';
-        w.querySelector('#ed-cancel').onclick = () => w.remove();
+        w.querySelector('#ed-back').onclick = () => w.remove();
         w.querySelector('#ed-save').onclick = () => {
             const name = w.querySelector('#ed-name').value.trim().toUpperCase();
             const min = parseInt(w.querySelector('#ed-min').value);
